@@ -12,16 +12,6 @@ const MOOD = {
 const INK = { eye: "#2e1f16", rim: 0.8, rimColor: "#ffe9d2", coreBoost: 1.35, satBoost: 1.2 };
 const SHELL = { milk: [0.2, 0.205, 0.235], edge: [0.33, 0.335, 0.37], band: [0.1, 0.1, 0.12], clear: 0.35, sheen: 0.06, shadowOpacity: 0.5 };
 
-function pebble() {
-  const g = new THREE.SphereGeometry(1, 128, 96);
-  const p = g.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i);
-    if (x > 0.8) p.setX(i, 0.8 + (x - 0.8) * 0.45);
-  }
-  g.computeVertexNormals();
-  return g;
-}
 const hexRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 function coreRgb(hex) {
   const c = new THREE.Color(hex);
@@ -34,12 +24,21 @@ function coreRgb(hex) {
 }
 
 const bodyVert = `
+  uniform float uFlat; // 1 = pebble (dock side pressed flat), 0 = round
   varying vec3 vObj; varying vec3 vCam; varying vec3 vN; varying vec3 vView;
   void main() {
-    vObj = position;
+    vec3 p = position;
+    vec3 nrm = normal;
+    // Press the dock side (+x) flat like a pebble, only as much as uFlat asks.
+    float keep = mix(1.0, 0.45, uFlat);
+    if (p.x > 0.8) {
+      p.x = 0.8 + (p.x - 0.8) * keep;
+      nrm = normalize(vec3(nrm.x / keep, nrm.y, nrm.z));
+    }
+    vObj = p;
     vCam = (inverse(modelMatrix) * vec4(cameraPosition, 1.0)).xyz;
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vN = normalize(normalMatrix * normal);
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vN = normalize(normalMatrix * nrm);
     vView = -mv.xyz;
     gl_Position = projectionMatrix * mv;
   }`;
@@ -148,7 +147,7 @@ export function createOrb3D(canvas, { target, reduced = false, onFrame = null, f
 
   const U = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, { value: v }]));
   const bodyU = U({ uCenter: new THREE.Vector3(), uEdge: new THREE.Vector3(), uMilk: new THREE.Vector3(...SHELL.milk), uRimColor: new THREE.Vector3(...hexRgb(INK.rimColor)),
-    uIntensity: 1, uSwirl: 0, uTime: 0, uRim: INK.rim, uSheen: SHELL.sheen, uSpread: 1, uBand: new THREE.Vector3(...SHELL.band), uClear: SHELL.clear, uDark: 1 });
+    uIntensity: 1, uSwirl: 0, uTime: 0, uRim: INK.rim, uSheen: SHELL.sheen, uSpread: 1, uBand: new THREE.Vector3(...SHELL.band), uClear: SHELL.clear, uDark: 1, uFlat: 1 });
   const EYE_PLANE = new THREE.Vector2(1.6, 0.9);
   const eyeU = U({ uColor: new THREE.Vector3(...hexRgb(INK.eye)), uShape: new THREE.Vector3(1, 0, 0), uLook: new THREE.Vector2(), uRight: 1, uBlink: 0, uPlane: EYE_PLANE });
   const haloU = U({ uColor: new THREE.Vector3(), uOpacity: 0 });
@@ -161,7 +160,7 @@ export function createOrb3D(canvas, { target, reduced = false, onFrame = null, f
   const body = new THREE.Group();
   const halo = new THREE.Mesh(new THREE.PlaneGeometry(3.3, 3.3), mat(haloFrag, haloU));
   halo.position.z = -1.1; halo.renderOrder = 1;
-  const sphere = new THREE.Mesh(pebble(), new THREE.ShaderMaterial({ vertexShader: bodyVert, fragmentShader: bodyFrag, uniforms: bodyU, transparent: true }));
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 96), new THREE.ShaderMaterial({ vertexShader: bodyVert, fragmentShader: bodyFrag, uniforms: bodyU, transparent: true }));
   sphere.renderOrder = 2;
   const eyes = new THREE.Mesh(new THREE.PlaneGeometry(EYE_PLANE.x, EYE_PLANE.y), mat(eyeFrag, eyeU, { depthTest: false }));
   eyes.position.z = 1.02; eyes.renderOrder = 3;
@@ -266,8 +265,9 @@ export function createOrb3D(canvas, { target, reduced = false, onFrame = null, f
     body.position.y = bob;
     body.rotation.z = THREE.MathUtils.degToRad(tilt);
     // Seen large and away from the edge, the flat dock side turns away from the viewer.
-    const turnTo = pos.size > 100 ? -0.75 : 0;
-    sphere.rotation.y += (turnTo - sphere.rotation.y) * (reduced ? 1 : 1 - Math.exp(-dt / 0.25));
+    // Pebble only while docked into the screen edge; round everywhere else, so the flat side never faces you.
+    const flatTo = tg.docked ? 1 : 0;
+    bodyU.uFlat.value += (flatTo - bodyU.uFlat.value) * (reduced ? 1 : 1 - Math.exp(-dt / 0.12));
     shadow.scale.set(1 - 0.04 * breathe, 1 - 0.04 * breathe, 1);
 
     renderer.render(scene, camera);

@@ -21,7 +21,7 @@ function target() {
     if (inZone) return { key, x: r.left + r.width / 2, y: cy, size: r.width };
   }
   const size = vw < 920 ? 48 : 64;
-  return { key: out ? "edge-out" : "edge", x: vw - (out ? 24 + size / 2 : 0), y: vh / 2, size, bob: out };
+  return { key: out ? "edge-out" : "edge", x: vw - (out ? 24 + size / 2 : 0), y: vh / 2, size, bob: out, docked: !out };
 }
 
 const dock = $("#dock");
