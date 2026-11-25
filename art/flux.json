@@ -1,0 +1,42 @@
+{
+  "style": "Editorial illustration in a risograph print style: flat simple shapes with soft grain texture and slightly off-register two-tone printing. Limited palette: warm cream paper background (#f3ede2), deep warm ink black, amber orange and a little soft teal. Characterful people with simple, expressive faces and relaxed poses. Calm, premium and modern, like a New Yorker spot illustration. Lots of empty cream space around the subject. Absolutely no text, letters, numbers, logos, watermarks or signature anywhere.",
+  "negative": "screen text, writing on screen, letters, logo, apple logo, signature, watermark, photo, 3D render",
+  "shots": {
+    "hero": {
+      "w": 1344,
+      "h": 768,
+      "seed": 11,
+      "prompt": "A person seen from behind at a tidy wooden desk, working at one large desktop monitor. The monitor screen is a plain soft pale glow with a few abstract grey blocks, no text. A mug and a small plant on the desk, a tall window with a warm late-afternoon sky. The right edge of the monitor is empty and catches a warm amber glow."
+    },
+    "writer": {
+      "w": 832,
+      "h": 1040,
+      "seed": 21,
+      "prompt": "A young woman with short curly hair at a laptop in a quiet cafe, leaning back with a relieved half-smile, one hand on the trackpad. The laptop is seen from behind so its screen is not visible. A coffee cup and a croissant beside her."
+    },
+    "coder": {
+      "w": 832,
+      "h": 1040,
+      "seed": 31,
+      "prompt": "A software developer with round glasses and a hoodie, sitting at a desk with two monitors seen from the side so the screens are not visible, eyebrows raised in a small moment of realisation, one finger raised. A mechanical keyboard and a cable, evening light."
+    },
+    "reader": {
+      "w": 832,
+      "h": 1040,
+      "seed": 51,
+      "prompt": "A middle-aged man with reading glasses at a kitchen table with a laptop seen from behind, holding an official-looking letter with no visible writing, puzzled but calm expression, a teapot and a fruit bowl."
+    },
+    "tabs": {
+      "w": 1344,
+      "h": 768,
+      "seed": 61,
+      "prompt": "A tired office worker at a desk surrounded by a messy cloud of many floating blank browser windows, sticky notes and arrows looping back and forth between them, juggling, comic exasperation. Every window is blank with no text."
+    },
+    "designer": {
+      "w": 832,
+      "h": 1040,
+      "seed": 71,
+      "prompt": "A designer with a bun and headphones around their neck at a desk with a drawing tablet and a monitor seen from the side, pointing at something just off-frame with a pen, a small warm amber light glows where they point."
+    }
+  }
+}

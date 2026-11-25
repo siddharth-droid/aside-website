@@ -1,2 +1,6 @@
 .DS_Store
 Thumbs.db
+.taste-skill/
+film/renders/
+film/.hyperframes/
+node_modules/

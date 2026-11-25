@@ -3,14 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aside: keep working, ask Aside</title>
-<meta name="description" content="Aside is a small orb at the edge of Windows. Select something, press your trigger, and the answer opens right there. Copy it, or put it straight back where it came from.">
-<meta name="color-scheme" content="dark">
+<title>Aside: AI answers at the edge of Windows</title>
+<meta name="description" content="Aside is a small orb at the edge of your screen. Select something in any Windows app, press your trigger, and the answer opens right there. One more key puts it back in place.">
+<meta name="theme-color" content="#f7f6f3">
+<meta property="og:title" content="Aside: AI answers at the edge of Windows">
+<meta property="og:description" content="Select something, press your trigger, and the answer opens right where you're working. No account, no subscription, your own model key.">
+<meta property="og:type" content="website">
+<meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ffd27a'/%3E%3Cstop offset='.6' stop-color='%23f5a742'/%3E%3Cstop offset='1' stop-color='%232a2c33'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Cellipse cx='11' cy='15.5' rx='1.4' ry='2.3' fill='%232e1f16'/%3E%3Cellipse cx='21' cy='15.5' rx='1.4' ry='2.3' fill='%232e1f16'/%3E%3C/svg%3E">
-<link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/apfel-grotezk-mittel.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/apfel-grotezk-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/doto-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="vendor/three.module.js">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="v2.css">
+<link rel="stylesheet" href="site.css?v=18">
 </head>
 <body>
 
@@ -20,7 +25,7 @@
 <div class="orb-light" id="orbLight" aria-hidden="true"></div>
 <canvas class="orb-canvas" id="orbCanvas" aria-hidden="true"></canvas>
 
-<!-- Fallback orb (no WebGL2): CSS renderer docked at the right edge. -->
+<!-- Fallback orb (no WebGL2): the CSS renderer, docked at the right edge. -->
 <div class="dock" id="dock" aria-hidden="true">
   <div class="orb" id="orb">
     <div class="orb__body"><div class="orb__core"></div><div class="orb__frost"></div></div>
@@ -34,14 +39,13 @@
 <svg class="spark-layer" id="sparkLayer" aria-hidden="true"><path id="sparkPath" fill="none"/><circle id="spark" r="4"/></svg>
 
 <header class="nav">
-  <div class="wrap nav__inner">
+  <div class="nav__pill">
     <a class="wordmark" href="#top" aria-label="Aside, home"><span class="wordmark__dot" aria-hidden="true"></span>Aside</a>
     <nav aria-label="Sections">
       <ul class="nav__links">
-        <li><a href="#why">Why Aside</a></li>
+        <li><a href="#film">Film</a></li>
         <li><a href="#try">Try it</a></li>
-        <li><a href="#capture">Show me</a></li>
-        <li><a href="#memory">Memory</a></li>
+        <li><a href="#show">Show me</a></li>
         <li><a href="#privacy">Privacy</a></li>
       </ul>
     </nav>
@@ -51,24 +55,83 @@
 
 <main id="main">
 
-<!-- HERO: a live desktop -->
-<section class="hero2" id="top" aria-labelledby="hero-title">
+<!-- 1. HERO (Signal): one line, with the product's own pill inside it -->
+<section class="hero" id="top" aria-labelledby="hero-title">
+  <div class="wrap hero__copy" data-enter>
+    <p class="tag">AI answers at the edge of Windows</p>
+    <h1 id="hero-title" class="display">
+      <span class="sr">Select it. Ask Aside. Get back to work.</span>
+      <span aria-hidden="true">Select it. <span class="pill" id="heroPill"><span class="pill__orb" id="pillOrb"></span>Ask Aside<kbd>Alt + M5</kbd></span><br><span class="display__grey">Get back to work.</span></span>
+    </h1>
+    <p class="lede">A small orb at the edge of your screen. Select something in any app, press your trigger, and the answer opens right there. One more key puts the rewrite back in place.</p>
+    <div class="cta">
+      <a class="btn btn--signal" id="heroDl" href="https://github.com/siddharth-droid/aside/releases/latest"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
+      <a class="btn" href="#film"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg>Watch the 30s film</a>
+    </div>
+    <ul class="facts-row" aria-label="What it takes">
+      <li>No account</li>
+      <li>No subscription</li>
+      <li>Your own DeepSeek or Gemini key</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 2. THE DEMO: a real Windows desktop, three jobs -->
+<section class="work" id="work" aria-labelledby="work-title">
   <div class="wrap">
-    <div class="hero2__top">
-      <h1 id="hero-title" class="mega"><span class="mega__a">Keep working.</span> <span class="mega__b">Ask Aside.</span></h1>
-      <div class="hero2__side">
-        <p class="lede">A small orb at the edge of Windows. Select something, press your trigger, and the answer opens right there. Copy it, or put it straight back where it came from.</p>
-        <div class="cta">
-          <a class="btn" href="#download"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
-          <span class="cta__note">No account. No subscription.<br>Your own model key.</span>
-        </div>
+    <div class="head-split">
+      <div>
+        <p class="tag">a day with Aside</p>
+        <h2 id="work-title" class="h2">Three people, three questions, <em>zero tabs.</em></h2>
+      </div>
+      <ol class="phases" id="phases" aria-label="The six steps of a quick question">
+        <li data-phase="1"><span>01</span>Summon</li>
+        <li data-phase="2"><span>02</span>Hand it the context</li>
+        <li data-phase="3"><span>03</span>Ask</li>
+        <li data-phase="4"><span>04</span>Read</li>
+        <li data-phase="5"><span>05</span>Use it</li>
+        <li data-phase="6"><span>06</span>Back to work</li>
+      </ol>
+    </div>
+
+    <div class="desk__controls">
+      <div class="scenes" role="tablist" aria-label="Whose question to watch">
+        <button role="tab" class="scene-tab" data-scene="mail" aria-selected="true">
+          <span class="cast" data-who="sam" data-face="frustrated" data-done="relieved"></span>
+          <span class="scene-tab__time">09:12</span><b>Sam rewrites an email</b><span class="scene-tab__q">“Make this less passive-aggressive.”</span>
+        </button>
+        <button role="tab" class="scene-tab" data-scene="code" aria-selected="false">
+          <span class="cast" data-who="ade" data-face="thinking" data-done="surprised"></span>
+          <span class="scene-tab__time">11:40</span><b>Ade explains an error</b><span class="scene-tab__q">“Why is items undefined?”</span>
+        </button>
+        <button role="tab" class="scene-tab" data-scene="web" aria-selected="false">
+          <span class="cast" data-who="tom" data-face="frustrated" data-done="happy"></span>
+          <span class="scene-tab__time">17:30</span><b>Tom translates a form</b><span class="scene-tab__q">“What does the council want?”</span>
+        </button>
       </div>
     </div>
 
+    <div class="stage">
     <div class="desk" id="desk">
       <p class="sr" id="deskDesc">A demonstration plays on a Windows desktop: text is selected, the orb at the right edge answers in a small panel, and the answer is copied or put back in place.</p>
       <div class="desk__screen" aria-hidden="true">
-        <div class="desk__wall"></div>
+        <svg class="desk__wall" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="wSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#141a2b"/><stop offset=".38" stop-color="#2c2a44"/><stop offset=".6" stop-color="#7a4a52"/><stop offset=".74" stop-color="#d8855a"/><stop offset=".82" stop-color="#f3bb7d"/>
+            </linearGradient>
+            <radialGradient id="wSun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff3d6"/><stop offset=".25" stop-color="#ffd590" stop-opacity=".95"/><stop offset="1" stop-color="#f5a742" stop-opacity="0"/></radialGradient>
+            <linearGradient id="wHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3bb7d" stop-opacity="0"/><stop offset="1" stop-color="#f3bb7d" stop-opacity=".35"/></linearGradient>
+          </defs>
+          <rect width="1600" height="900" fill="url(#wSky)"/>
+          <circle cx="1130" cy="640" r="260" fill="url(#wSun)"/>
+          <circle cx="1130" cy="640" r="46" fill="#fff0cf"/>
+          <path d="M0 610 C120 560 220 590 330 548 C440 506 520 560 640 530 C760 500 860 548 980 520 C1100 492 1190 540 1300 515 C1420 488 1510 530 1600 505 V900 H0Z" fill="#8d5f6a" opacity=".55"/>
+          <rect y="480" width="1600" height="200" fill="url(#wHaze)"/>
+          <path d="M0 668 C150 610 260 650 380 612 C500 574 600 640 720 610 C860 574 960 650 1090 622 C1210 596 1320 650 1450 616 C1520 598 1570 612 1600 606 V900 H0Z" fill="#5a3f52"/>
+          <path d="M0 735 C140 690 270 728 400 700 C540 670 650 724 790 702 C930 680 1040 730 1180 708 C1310 688 1440 728 1600 700 V900 H0Z" fill="#35283a"/>
+          <path d="M0 800 C180 768 330 800 480 784 C650 766 800 806 980 788 C1150 772 1320 806 1600 778 V900 H0Z" fill="#1b1622"/>
+        </svg>
 
         <!-- Mail -->
         <div class="dwin dwin--mail" data-scene="mail">
@@ -124,227 +187,128 @@
         <div class="dbar"><span class="dbar__start"></span><span></span><span></span><span></span><span class="dbar__time">09:41</span></div>
       </div>
     </div>
-
-    <div class="desk__controls">
-      <div class="scenes" role="tablist" aria-label="Demo scenes">
-        <button role="tab" class="scene-tab" data-scene="mail" aria-selected="true">Writing<span>Rewrite an email</span></button>
-        <button role="tab" class="scene-tab" data-scene="code" aria-selected="false">Coding<span>Explain an error</span></button>
-        <button role="tab" class="scene-tab" data-scene="web" aria-selected="false">Browsing<span>Translate a page</span></button>
-      </div>
       <button class="playpause" id="playPause" aria-label="Pause the demo"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="pp-pause" d="M5 3v10M11 3v10"/><path class="pp-play" d="M5 3l8 5-8 5z"/></svg></button>
     </div>
-
-    <div class="ticker" aria-label="Things to ask Aside">
-      <ul class="ticker__track">
-        <li>Explain this error <kbd>Enter</kbd></li><li>Translate this page <kbd>Ctrl T</kbd></li><li>Rewrite this, friendlier <kbd>Ctrl R</kbd></li><li>What does this clause mean?</li><li>Where's the export button?</li><li>Summarise this thread</li><li>Is this formula right?</li><li>What is this chart saying?</li>
-        <li aria-hidden="true">Explain this error <kbd>Enter</kbd></li><li aria-hidden="true">Translate this page <kbd>Ctrl T</kbd></li><li aria-hidden="true">Rewrite this, friendlier <kbd>Ctrl R</kbd></li><li aria-hidden="true">What does this clause mean?</li><li aria-hidden="true">Where's the export button?</li><li aria-hidden="true">Summarise this thread</li><li aria-hidden="true">Is this formula right?</li><li aria-hidden="true">What is this chart saying?</li>
-      </ul>
-    </div>
-
-    <ul class="strengths" aria-label="What Aside does">
-      <li><b>Context comes along</b><span>Your selection arrives with the question. Drag the orb onto anything to capture it.</span></li>
-      <li><b>Answers go back</b><span>Replace the selection in place, in the app you were using.</span></li>
-      <li><b>It remembers you</b><span>A small local memory of how you like answers.</span></li>
-      <li><b>A presence, not a window</b><span>The orb shows what it's doing and how it feels.</span></li>
-      <li><b>Your keys, your PC</b><span>No account, no subscription, no server of ours.</span></li>
-    </ul>
   </div>
 </section>
 
-<!-- WHY ASIDE -->
-<section class="why" id="why" aria-labelledby="why-title">
-  <div class="wrap why__inner">
-    <p class="why__def"><span class="why__word">a·side</span> <span class="why__pos">noun</span></p>
-    <h2 id="why-title" class="why__big">In a play, an aside is a line spoken off to one side while the scene carries on.</h2>
-    <p class="why__body">That's how a quick question should feel. You ask, you get your answer, and the scene, your work, never stops. No new tab, no copying context across, no copying the answer back.</p>
+<!-- 3. THE FILM (Collage): the whole idea in 30 seconds, made in code (film/) -->
+<section class="film collage" id="film" aria-labelledby="film-title">
+  <div class="wrap">
+    <h2 id="film-title" class="ransom"><span class="r r--ink">The</span> <span class="r r--yellow">whole</span> <span class="r r--paper">idea</span> <span class="r r--red">in</span> <span class="r r--blue">30 seconds.</span></h2>
+    <div class="film__frame torn">
+      <video id="filmVideo" class="film__video" src="assets/film/aside-30s.mp4" poster="assets/film/poster.jpg" preload="none" playsinline controls></video>
+      <span class="tape tape--tl" aria-hidden="true"></span><span class="tape tape--br" aria-hidden="true"></span>
+    </div>
+    <p class="film__note">Sam, Ade and Tom each have a question. Watch what the chat tab costs them, and what Aside doesn't.</p>
   </div>
 </section>
 
-<div class="wrap page">
-
-  <!-- VS A CHAT TAB -->
-  <section class="row race" id="race" aria-labelledby="race-title">
-    <div class="col-doc">
-      <div class="race__grid" id="raceGrid">
-        <div class="race__col">
-          <p class="race__h">With a chat tab</p>
-          <p class="race__count" id="raceCountA">0 steps · 0 app switches</p>
-          <ol class="race__list" data-race="a">
-            <li>Copy the text</li>
-            <li data-switch>Switch to the browser</li>
-            <li>Find or open the chat tab</li>
-            <li>Paste it, and explain what it is</li>
-            <li>Ask, wait, read</li>
-            <li>Copy the answer</li>
-            <li data-switch>Switch back to your app</li>
-            <li>Find your place, and paste</li>
-          </ol>
-        </div>
-        <div class="race__col race__col--aside">
-          <p class="race__h">With Aside</p>
-          <p class="race__count" id="raceCountB">0 steps · 0 app switches</p>
-          <ol class="race__list" data-race="b">
-            <li>Select the text</li>
-            <li>Press <kbd class="key key--s">Alt</kbd> + <kbd class="key key--s">Mouse 5</kbd></li>
-            <li>Press <kbd class="key key--s">Ctrl R</kbd> to rewrite</li>
-            <li>Press <kbd class="key key--s">Ctrl Enter</kbd> to put it back</li>
-          </ol>
-          <p class="race__done" id="raceDone">Back to work.</p>
-        </div>
+<!-- 4. WHY (Collage): the name, and the trip it saves -->
+<section class="why collage" id="why" aria-labelledby="why-title">
+  <div class="wrap why__grid">
+    <div class="why__copy">
+      <p class="dict"><b>a·side</b> <i>noun</i> · a line spoken off to one side, while the scene carries on.</p>
+      <h2 id="why-title" class="ransom"><span class="r r--ink">8 steps</span> <span class="r r--paper">or</span> <span class="r r--yellow">3 keys.</span></h2>
+      <p class="body">One rewrite, done both ways. The chat tab isn't slow; the trip there and back is.</p>
+      <button class="btn btn--small" id="raceAgain">Run it again</button>
+    </div>
+    <div class="race" id="raceGrid">
+      <span class="race__who race__who--a cast" data-who="sam" data-face="frustrated" aria-hidden="true"></span>
+      <span class="race__who race__who--b cast" data-who="sam" data-face="relieved" aria-hidden="true"></span>
+      <div class="race__col">
+        <p class="race__h">With a chat tab</p>
+        <p class="race__count" id="raceCountA">0 steps · 0 app switches</p>
+        <ol class="race__list" data-race="a">
+          <li>Copy the text</li>
+          <li data-switch>Switch to the browser</li>
+          <li>Find or open the chat tab</li>
+          <li>Paste it, and explain what it is</li>
+          <li>Ask, wait, read</li>
+          <li>Copy the answer</li>
+          <li data-switch>Switch back to your app</li>
+          <li>Find your place, and paste</li>
+        </ol>
+      </div>
+      <div class="race__col race__col--aside">
+        <p class="race__h">With Aside</p>
+        <p class="race__count" id="raceCountB">0 steps · 0 app switches</p>
+        <ol class="race__list" data-race="b">
+          <li>Select the text</li>
+          <li>Press <kbd class="key">Alt</kbd> + <kbd class="key">Mouse 5</kbd></li>
+          <li>Press <kbd class="key">Ctrl R</kbd> to rewrite</li>
+          <li>Press <kbd class="key">Ctrl Enter</kbd> to put it back</li>
+        </ol>
+        <p class="race__done" id="raceDone">Back to work.</p>
       </div>
     </div>
-    <div class="col-margin">
-      <h2 id="race-title" class="h2">Half the steps, and you never leave the app.</h2>
-      <p class="body">One rewrite, done both ways. The chat tab isn't slow; getting to it and back is. Aside removes the trip.</p>
-      <button class="chip chip--page" id="raceAgain">Run it again</button>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <!-- TRY IT, BY JOB -->
-  <section class="row try2" id="try" aria-labelledby="try-title">
-    <div class="col-doc">
-      <div class="jobs" role="tablist" aria-label="Choose a job">
-        <button role="tab" class="job" data-job="writing" aria-selected="true">Writing</button>
-        <button role="tab" class="job" data-job="coding" aria-selected="false">Coding</button>
-        <button role="tab" class="job" data-job="studying" aria-selected="false">Studying</button>
-        <button role="tab" class="job" data-job="browsing" aria-selected="false">Browsing</button>
+<!-- 4. TRY IT -->
+<section class="try" id="try" aria-labelledby="try-title">
+  <div class="wrap">
+    <div class="head-split">
+      <div>
+        <p class="tag">try it here</p>
+        <h2 id="try-title" class="h2">Try it on <em>your kind of work.</em></h2>
       </div>
-      <div class="window" id="tryWin">
-        <div class="window__bar">
-          <span class="window__title" id="tryTitle"></span>
-          <span class="window__caps" aria-hidden="true">
-            <svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg>
-            <svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg>
-            <svg viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10"/></svg>
-          </span>
-        </div>
-        <div class="mail mail__body" id="tryDoc"></div>
-      </div>
-      <p class="try"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2v10l3-3 2 5 2-1-2-5h4z"/></svg>Click a dotted sentence, or select any text.</p>
+      <p class="body">Pick a job, then click a dotted sentence or select any text. The answers on this page are written ahead of time; in Aside they come from the model you chose.</p>
     </div>
-
-    <div class="col-margin">
-      <h2 id="try-title" class="h2">Try it on your kind of work.</h2>
-      <p class="body">Pick a job, then select a sentence. The answers here are written ahead of time; in Aside they come from the model you chose.</p>
-      <div class="panel note" id="note" data-state="empty" aria-live="polite">
-        <div class="ctx" id="noteCtx">
-          <span class="ctx__label">Your selection</span>
-          <p class="ctx__text" id="noteExcerpt"></p>
+    <div class="try__grid">
+      <div class="try__doc">
+        <div class="jobs" role="tablist" aria-label="Choose a job">
+          <button role="tab" class="job" data-job="writing" aria-selected="true">Writing</button>
+          <button role="tab" class="job" data-job="coding" aria-selected="false">Coding</button>
+          <button role="tab" class="job" data-job="studying" aria-selected="false">Studying</button>
+          <button role="tab" class="job" data-job="browsing" aria-selected="false">Browsing</button>
         </div>
-        <div class="chips" id="noteChips" role="group" aria-label="Actions for the selection">
-          <button class="chip" data-act="explain">Explain <kbd>Enter</kbd></button>
-          <button class="chip" data-act="translate">Translate <kbd>Ctrl T</kbd></button>
-          <button class="chip" data-act="rewrite">Rewrite <kbd>Ctrl R</kbd></button>
-        </div>
-        <div class="answer" id="noteAnswer">
-          <p class="answer__q" id="noteQ"></p>
-          <p class="status sr" id="noteStatus" role="status"></p>
-          <div class="answer__text" id="noteText"></div>
-          <div class="answer__acts" id="noteActs">
-            <button class="act" id="noteCopy">Copy <kbd>Ctrl Shift C</kbd></button>
-            <button class="act act--primary" id="noteReplace">Replace selection <kbd>Ctrl Enter</kbd></button>
+        <div class="window" id="tryWin">
+          <div class="window__bar">
+            <span class="window__title" id="tryTitle"></span>
+            <span class="window__caps" aria-hidden="true">
+              <svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg>
+              <svg viewBox="0 0 10 10"><rect x=".5" y=".5" width="9" height="9"/></svg>
+              <svg viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10"/></svg>
+            </span>
           </div>
+          <div class="mail mail__body" id="tryDoc"></div>
         </div>
-        <p class="note__empty" id="noteEmpty">Nothing selected yet. Aside waits at the edge until you hand it something.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- MOODS -->
-  <section class="row moods" id="moods" aria-labelledby="moods-title">
-    <div class="col-doc moods__stage">
-      <div class="moods__slot" id="slotMoods"></div>
-      <p class="moods__caption" id="moodCaption" aria-live="polite">Idle</p>
-    </div>
-    <div class="col-margin">
-      <h2 id="moods-title" class="h2">It has a face, and it's honest about what it's doing.</h2>
-      <p class="body">The orb is a frosted-glass pebble with a warm light inside. The light and the eyes say what it's doing and how it feels about your question. None of it ever slows the answer down.</p>
-      <ul class="mood-list" id="moodList">
-        <li><button class="mood" data-mood="idle" style="--dot:#f5a742"><b>Idle</b><span>Waiting at the edge. Its eyes follow your cursor.</span></button></li>
-        <li><button class="mood" data-mood="thinking" style="--dot:#c9894a"><b>Thinking</b><span>Working on your answer. The light dims and turns.</span></button></li>
-        <li><button class="mood" data-mood="curious" style="--dot:#4fc4bb"><b>Curious</b><span>Something new to look at: your selection, or a capture.</span></button></li>
-        <li><button class="mood" data-mood="happy" style="--dot:#ff9e6b"><b>Happy</b><span>The answer landed. The light fills the whole orb.</span></button></li>
-        <li><button class="mood" data-mood="screenshot" style="--dot:#ff7f6e"><b>Capturing</b><span>Eyes closed, taking a picture of the region you dropped it on.</span></button></li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS: one question, six steps -->
-  <section class="row loop" id="how" aria-labelledby="how-title">
-    <div class="col-doc">
-      <div class="stage" id="stage" data-step="0" aria-hidden="true">
-        <div class="window window--small">
-          <div class="window__bar"><span class="window__title">Re: Thursday's launch review · Draft</span></div>
-          <div class="mail mail--small">
-            <p>Thanks for sending the deck over. <span class="stage__s"><span class="stage__old">Per my last email, the copy deadline was Monday and we still don't have the final pricing page.</span><span class="stage__new">The copy deadline was Monday, and we're still waiting on the final pricing page. Could we have it by Wednesday?</span></span><span class="stage__caret"></span> I know your team has been stretched, so let's find a way through this.</p>
+      <div class="try__side">
+        <div class="panel note" id="note" data-state="empty" aria-live="polite">
+          <div class="ctx" id="noteCtx">
+            <span class="ctx__label">Your selection</span>
+            <p class="ctx__text" id="noteExcerpt"></p>
           </div>
-        </div>
-        <div class="stage__keys stage__keys--summon"><kbd class="key">Alt</kbd><span>+</span><kbd class="key">Mouse 5</kbd></div>
-        <div class="stage__keys stage__keys--esc"><kbd class="key">Esc</kbd></div>
-        <div class="panel stage__panel stage__pill"><span class="pill__ph">Ask about the selection</span></div>
-        <div class="panel stage__panel stage__ctx">
-          <div class="ctx"><span class="ctx__label">Your selection</span><p class="ctx__text">Per my last email, the copy deadline was Monday and we still don't have the final pricing page.</p></div>
-          <p class="stage__aside">This is everything Aside sees.</p>
-        </div>
-        <div class="panel stage__panel stage__ask">
-          <div class="chips"><span class="chip">Explain <kbd>Enter</kbd></span><span class="chip">Translate <kbd>Ctrl T</kbd></span><span class="chip is-on">Rewrite <kbd>Ctrl R</kbd></span></div>
-          <p class="stage__aside">or type a question</p>
-        </div>
-        <div class="panel stage__panel stage__read">
-          <p class="answer__q">Rewrite the selection</p>
-          <p class="answer__h">The copy deadline was Monday, and we're still waiting on the final pricing page.</p>
-          <p class="answer__b">Could we have it by Wednesday?</p>
-        </div>
-        <div class="panel stage__panel stage__use">
-          <p class="answer__q">Rewrite the selection</p>
-          <p class="answer__h">The copy deadline was Monday, and we're still waiting on the final pricing page.</p>
-          <div class="answer__acts"><span class="act">Copy <kbd>Ctrl Shift C</kbd></span><span class="act act--primary is-on">Replace selection <kbd>Ctrl Enter</kbd></span></div>
+          <div class="chips" id="noteChips" role="group" aria-label="Actions for the selection">
+            <button class="chip" data-act="explain">Explain <kbd>Enter</kbd></button>
+            <button class="chip" data-act="translate">Translate <kbd>Ctrl T</kbd></button>
+            <button class="chip" data-act="rewrite">Rewrite <kbd>Ctrl R</kbd></button>
+          </div>
+          <div class="answer" id="noteAnswer">
+            <p class="answer__q" id="noteQ"></p>
+            <p class="status sr" id="noteStatus" role="status"></p>
+            <div class="answer__text" id="noteText"></div>
+            <div class="answer__acts" id="noteActs">
+              <button class="act" id="noteCopy">Copy <kbd>Ctrl Shift C</kbd></button>
+              <button class="act act--primary" id="noteReplace">Replace selection <kbd>Ctrl Enter</kbd></button>
+            </div>
+          </div>
+          <p class="note__empty" id="noteEmpty">Nothing selected yet. Aside waits at the edge until you hand it something.</p>
         </div>
       </div>
     </div>
-    <div class="col-margin">
-      <h2 id="how-title" class="h2">One question, start to finish, in the app you were already in.</h2>
-      <ol class="steps" id="steps">
-        <li class="step" data-step="1"><h3>Summon</h3><p>Press your trigger from any app. It's Alt and Mouse 5 until you pick your own: any key, or a modifier with the middle or side mouse buttons. The orb slides out from the edge.</p></li>
-        <li class="step" data-step="2"><h3>Hand it the context</h3><p>Whatever you had selected comes along, shown in the panel so you can see exactly what was sent. Drop it with one click if you didn't mean it.</p></li>
-        <li class="step" data-step="3"><h3>Ask</h3><p>With a selection, explain, translate and rewrite are one key each. Otherwise, a few words. No describing what's on your screen.</p></li>
-        <li class="step" data-step="4"><h3>Read</h3><p>A short answer, streamed out of the orb, always in the same place at the right edge. The first sentence is the answer; the rest is detail if you want it.</p></li>
-        <li class="step" data-step="5"><h3>Use it</h3><p>Copy it, or replace your selection: the rewrite or translation is pasted into the app you came from, where the original was.</p></li>
-        <li class="step" data-step="6"><h3>Get back to work</h3><p>Esc or the trigger again. The orb tucks back into the edge and you're where you were, with the caret where you left it.</p></li>
-      </ol>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CAPTURE + SHOW ME -->
-  <section class="row capture" id="capture" aria-labelledby="capture-title">
-    <div class="col-doc">
-      <div class="app" id="app">
-        <div class="app__menu">
-          <button class="app__item" id="tFile" tabindex="-1">File</button><span class="app__item">Edit</span><span class="app__item">Image</span><span class="app__item">View</span>
-          <div class="app__drop" id="dropFile">
-            <span>New</span><span>Open…</span><span>Save</span><button class="app__dropitem" id="tExport" tabindex="-1">Export…</button><span>Print…</span>
-          </div>
-        </div>
-        <div class="app__main">
-          <aside class="app__side"><span class="is-on">Layers</span><span>Adjust</span><span>History</span></aside>
-          <div class="app__canvas"><div class="app__art" aria-hidden="true"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3a55"/><stop offset=".55" stop-color="#d98a5f"/><stop offset="1" stop-color="#f0c08a"/></linearGradient><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5d74"/><stop offset="1" stop-color="#1d2735"/></linearGradient></defs><rect width="400" height="300" fill="url(#sky)"/><circle cx="270" cy="168" r="26" fill="#ffe2b0" opacity=".9"/><path d="M0 170 L60 140 L110 158 L170 128 L230 162 L300 150 L360 132 L400 148 V190 H0Z" fill="#3a3f52"/><rect y="186" width="400" height="114" fill="url(#sea)"/><g stroke="#f3c79a" stroke-opacity=".55" stroke-linecap="round"><path d="M240 196h60M226 208h88M250 220h40M236 232h70"/></g><g stroke="#8fa3bb" stroke-opacity=".35" stroke-linecap="round"><path d="M30 214h50M90 246h70M300 262h60M40 276h40"/></g><path d="M118 232 h70 l-10 14 h-52z" fill="#151a22"/><path d="M150 232 V176 L178 228z" fill="#e9e1d4"/><path d="M148 232 V186 L128 228z" fill="#cfc6b8"/><path d="M0 300 V262 L40 254 L44 300z M360 300 L366 248 L400 244 V300z" fill="#10141b"/></svg></div></div>
-          <div class="app__dialog" id="dialog">
-            <p class="app__dt">Export</p>
-            <label>File name<span class="app__field">harbour-final</span></label>
-            <span class="app__label">Format</span>
-            <div class="app__formats"><span>JPEG</span><button id="tPng" tabindex="-1">PNG</button><span>WebP</span></div>
-            <span class="app__go">Export</span>
-          </div>
-        </div>
-        <div class="frame" id="frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
-        <div class="halo" id="halo" aria-hidden="true"><span class="halo__label" id="haloLabel"></span></div>
-      </div>
-      <p class="caption">An illustrated app. In Aside, the lit steps land on your real screen, inside the region you captured.</p>
-    </div>
-    <div class="col-margin">
-      <h2 id="capture-title" class="h2">Drag the orb onto anything. It shows you where to click.</h2>
-      <p class="body">When there's nothing to select, drag the orb over the part of the screen you're stuck on and let go. That region is the only image that ever leaves your machine.</p>
-      <p class="body">For how-to questions, the answer lights up the real things to click, one at a time, with a spark from the orb. Click the lit item and it moves on.</p>
+<!-- 5. CAPTURE + SHOW ME -->
+<section class="show" id="show" aria-labelledby="show-title">
+  <div class="wrap show__grid">
+    <div class="show__copy">
+      <p class="tag">show me</p>
+      <h2 id="show-title" class="h2">Drag the orb onto anything. <em>It shows you where to click.</em></h2>
+      <p class="body">When there's nothing to select, drag the orb over the part of the screen you're stuck on and let go. That region is the only image that ever leaves your machine. For how-to questions, the answer lights up the real things to click, one at a time.</p>
       <div class="panel note note--static" id="showNote">
         <div class="ctx ctx--img"><span class="ctx__label">Your capture</span><span class="ctx__thumb" aria-hidden="true"></span></div>
         <p class="answer__q">How do I export this as a PNG?</p>
@@ -354,113 +318,180 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- MEMORY -->
-  <section class="row memory" id="memory" aria-labelledby="memory-title">
-    <div class="col-doc">
-      <div class="settings">
-        <div class="settings__head">
-          <p class="settings__title">Memory</p>
-          <label class="switch"><input type="checkbox" checked id="memSwitch"><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Remember things about me</span></label>
-        </div>
-        <ul class="mem" id="memList">
-          <li><p>Prefers short answers, with detail only when asked.</p><span class="mem__date">Confirmed 21 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
-          <li><p>Writes to the Berlin team in German.</p><span class="mem__date">Confirmed 18 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
-          <li><p>Uses Excel on Windows: give Excel formulas, not Google Sheets.</p><span class="mem__date">Confirmed 12 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
-          <li><p>Wants rewrites to keep their own tone, just clearer.</p><span class="mem__date">Confirmed 3 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
-        </ul>
-        <p class="mem__empty" id="memEmpty" hidden>Nothing remembered. Aside answers each question fresh.</p>
-        <p class="settings__foot">Example entries. Try Forget, or switch memory off.</p>
-      </div>
-    </div>
-    <div class="col-margin">
-      <h2 id="memory-title" class="h2">It remembers how you like answers, so you never say it twice.</h2>
-      <p class="body">“I'm on Windows.” “Give me PowerShell.” “Keep it short.” Aside picks these up as you go and keeps them in a small local file, about a page long, that you can read in plain sentences.</p>
-      <p class="body">Entries carry the date they were last confirmed. Anything contradicted is dropped, anything unused for months lets go. Edit any line, forget it, or turn memory off with one switch.</p>
-    </div>
-  </section>
-
-  <!-- PRIVACY -->
-  <section class="row privacy" id="privacy" aria-labelledby="privacy-title">
-    <div class="col-doc">
-      <div class="wiring" role="img" aria-label="What leaves your PC: the selection, capture and question you hand over, plus memory as context, go straight to the model provider you chose with your own key. Aside has no servers.">
-        <div class="wiring__col">
-          <p class="wiring__h">On your PC</p>
-          <ul>
-            <li>The text you selected</li>
-            <li>The region you captured</li>
-            <li>Your question</li>
-            <li>Memory, a local file</li>
-            <li class="is-stay">Keys, in Windows Credential Manager</li>
-          </ul>
-        </div>
-        <div class="wiring__wire" aria-hidden="true"><span></span></div>
-        <div class="wiring__col">
-          <p class="wiring__h">Your provider, your key</p>
-          <ul>
-            <li>DeepSeek or Gemini for text</li>
-            <li>Qwen3-VL for captures</li>
-            <li>Tavily for web search, if you add a key</li>
-          </ul>
-        </div>
-        <div class="wiring__wire wiring__wire--cut" aria-hidden="true"><span></span></div>
-        <div class="wiring__col wiring__col--none">
-          <p class="wiring__h">Aside's servers</p>
-          <p class="wiring__none">None. There aren't any.</p>
+    <div class="app" id="app">
+      <div class="app__menu">
+        <button class="app__item" id="tFile" tabindex="-1">File</button><span class="app__item">Edit</span><span class="app__item">Image</span><span class="app__item">View</span>
+        <div class="app__drop" id="dropFile">
+          <span>New</span><span>Open…</span><span>Save</span><button class="app__dropitem" id="tExport" tabindex="-1">Export…</button><span>Print…</span>
         </div>
       </div>
-    </div>
-    <div class="col-margin">
-      <h2 id="privacy-title" class="h2">It only sees what you hand it.</h2>
-      <ul class="facts">
-        <li><strong>No watching.</strong> Aside never looks at your screen on its own: no active-window capture, nothing in the background. A selection, a dragged region or a dropped file is the whole of it.</li>
-        <li><strong>No account.</strong> Bring your own keys; they stay in Windows Credential Manager.</li>
-        <li><strong>Nothing kept.</strong> A conversation lasts until New chat or until you quit. Memory is the one exception, and you can read every line of it.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="row faq" id="faq" aria-labelledby="faq-title">
-    <div class="col-doc">
-      <div class="qa">
-        <details><summary>What does it cost?</summary><p>Aside has no subscription. You pay your model provider for what you use, on your own key. Text answers default to DeepSeek; Gemini is a switch in Settings.</p></details>
-        <details><summary>Which apps does it work in?</summary><p>Any app on Windows where you can select text, and anything on screen you can drag the orb over. Replace selection pastes back into the app you came from.</p></details>
-        <details><summary>Can it search the web?</summary><p>Yes, if you add a Tavily key. A “Searching for …” line shows while it looks.</p></details>
-        <details><summary>Will it act for me, or click things?</summary><p>No. It answers, and for how-to questions it lights up where to click. You do the clicking.</p></details>
-        <details><summary>Is there a Mac version?</summary><p>No. Aside is built on Windows itself: its trigger, selection and key storage are Windows parts.</p></details>
-        <details><summary>Does it follow dark mode?</summary><p>Yes. The panel and the orb follow your Windows app mode and switch live when you change it.</p></details>
+      <div class="app__main">
+        <aside class="app__side"><span class="is-on">Layers</span><span>Adjust</span><span>History</span></aside>
+        <div class="app__canvas"><div class="app__art" aria-hidden="true"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3a55"/><stop offset=".55" stop-color="#d98a5f"/><stop offset="1" stop-color="#f0c08a"/></linearGradient><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5d74"/><stop offset="1" stop-color="#1d2735"/></linearGradient></defs><rect width="400" height="300" fill="url(#sky)"/><circle cx="270" cy="168" r="26" fill="#ffe2b0" opacity=".9"/><path d="M0 170 L60 140 L110 158 L170 128 L230 162 L300 150 L360 132 L400 148 V190 H0Z" fill="#3a3f52"/><rect y="186" width="400" height="114" fill="url(#sea)"/><g stroke="#f3c79a" stroke-opacity=".55" stroke-linecap="round"><path d="M240 196h60M226 208h88M250 220h40M236 232h70"/></g><g stroke="#8fa3bb" stroke-opacity=".35" stroke-linecap="round"><path d="M30 214h50M90 246h70M300 262h60M40 276h40"/></g><path d="M118 232 h70 l-10 14 h-52z" fill="#151a22"/><path d="M150 232 V176 L178 228z" fill="#e9e1d4"/><path d="M148 232 V186 L128 228z" fill="#cfc6b8"/><path d="M0 300 V262 L40 254 L44 300z M360 300 L366 248 L400 244 V300z" fill="#10141b"/></svg></div></div>
+        <div class="app__dialog" id="dialog">
+          <p class="app__dt">Export</p>
+          <label>File name<span class="app__field">harbour-final</span></label>
+          <span class="app__label">Format</span>
+          <div class="app__formats"><span>JPEG</span><button id="tPng" tabindex="-1">PNG</button><span>WebP</span></div>
+          <span class="app__go">Export</span>
+        </div>
       </div>
-    </div>
-    <div class="col-margin">
-      <h2 id="faq-title" class="h2">Questions, answered short.</h2>
-      <p class="body">Aside is question and answer, nothing else. Not a chat app, not a workspace, not an agent that acts for you.</p>
-    </div>
-  </section>
-</div>
-
-<!-- CLOSE -->
-<section class="finale" id="download" aria-labelledby="dl-title">
-  <div class="wrap finale__inner">
-    <div class="finale__slot" id="slotClose"></div>
-    <h2 id="dl-title" class="mega mega--close"><span class="mega__a">Keep working.</span> <span class="mega__b">Ask Aside.</span></h2>
-    <p class="lede lede--center">For Windows. Install it, add a DeepSeek key in Settings, and press Alt with Mouse 5.</p>
-    <div class="cta cta--center">
-      <a class="btn" id="dlBtn" href="https://github.com/siddharth-droid/aside/releases/latest"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
+      <div class="frame" id="frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
+      <div class="halo" id="halo" aria-hidden="true"><span class="halo__label" id="haloLabel"></span></div>
     </div>
   </div>
 </section>
 
+<!-- 6. THE DETAILS: memory, moods, keys -->
+<section class="more" id="more" aria-labelledby="more-title">
+  <div class="wrap">
+    <div class="head-split">
+      <div>
+        <p class="tag">the details</p>
+        <h2 id="more-title" class="h2">It learns your habits, <em>and shows its feelings.</em></h2>
+      </div>
+      <p class="body">A small memory, so you never repeat yourself. A face that says what it's doing. A key for every action, so your hands stay where they are.</p>
+    </div>
+    <div class="bento">
+      <article class="card card--memory">
+        <div class="card__text">
+          <h3>It remembers how you like answers</h3>
+          <p>“I'm on Windows.” “Keep it short.” Aside picks these up as you go and keeps them in a local file about a page long. Edit any line, forget it, or switch memory off.</p>
+        </div>
+        <div class="settings">
+          <div class="settings__head">
+            <p class="settings__title">Memory</p>
+            <label class="switch"><input type="checkbox" checked id="memSwitch"><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Remember things about me</span></label>
+          </div>
+          <ul class="mem" id="memList">
+            <li><p>Prefers short answers, with detail only when asked.</p><span class="mem__date">Confirmed 21 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
+            <li><p>Writes to the Berlin team in German.</p><span class="mem__date">Confirmed 18 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
+            <li><p>Uses Excel on Windows: give Excel formulas, not Google Sheets.</p><span class="mem__date">Confirmed 12 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
+            <li><p>Wants rewrites to keep their own tone, just clearer.</p><span class="mem__date">Confirmed 3 Nov</span><button class="mem__btn">Edit</button><button class="mem__btn" data-forget>Forget</button></li>
+          </ul>
+          <p class="mem__empty" id="memEmpty" hidden>Nothing remembered. Aside answers each question fresh.</p>
+          <p class="settings__foot">Example entries. Try Forget, or switch memory off.</p>
+        </div>
+      </article>
+
+      <article class="card card--moods card--night">
+        <div class="card__text">
+          <h3>It's honest about what it's doing</h3>
+          <p>The light and the eyes show its state. Point at one and the orb at the edge of this page takes it on.</p>
+        </div>
+        <ul class="moods" id="moodList">
+          <li><button class="mood" data-mood="idle"><img class="mood__orb" src="assets/orb/orb-idle.png" width="120" height="125" alt="" loading="lazy">Idle</button></li>
+          <li><button class="mood" data-mood="thinking"><img class="mood__orb" src="assets/orb/orb-thinking.png" width="120" height="125" alt="" loading="lazy">Thinking</button></li>
+          <li><button class="mood" data-mood="curious"><img class="mood__orb" src="assets/orb/orb-curious.png" width="120" height="125" alt="" loading="lazy">Curious</button></li>
+          <li><button class="mood" data-mood="happy"><img class="mood__orb" src="assets/orb/orb-happy.png" width="120" height="125" alt="" loading="lazy">Happy</button></li>
+          <li><button class="mood" data-mood="screenshot"><img class="mood__orb" src="assets/orb/orb-screenshot.png" width="120" height="125" alt="" loading="lazy">Capturing</button></li>
+        </ul>
+      </article>
+
+      <article class="card card--keys">
+        <div class="card__text">
+          <h3>Every action has a key</h3>
+          <p>Your trigger is yours to set: any key, or a modifier with the middle or side mouse buttons.</p>
+        </div>
+        <dl class="keys">
+          <div><dt>Explain</dt><dd><kbd class="key">Enter</kbd></dd></div>
+          <div><dt>Translate</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">T</kbd></dd></div>
+          <div><dt>Rewrite</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">R</kbd></dd></div>
+          <div><dt>Replace selection</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">Enter</kbd></dd></div>
+          <div><dt>Dismiss</dt><dd><kbd class="key">Esc</kbd></dd></div>
+        </dl>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 7. PRIVACY: the one dark section -->
+<section class="privacy" id="privacy" aria-labelledby="privacy-title">
+  <div class="wrap">
+    <div class="head-split">
+      <div>
+        <p class="tag">privacy</p>
+        <h2 id="privacy-title" class="h2">It only sees <em>what you hand it.</em></h2>
+      </div>
+      <p class="body">Aside never looks at your screen on its own: no active-window capture, nothing in the background. A selection, a dragged region or a dropped file is the whole of it.</p>
+    </div>
+    <div class="privacy__grid">
+      <figure class="receipt-wrap">
+        <div class="receipt">
+          <p class="receipt__head">One question, itemised</p>
+          <p class="receipt__sub">Sam's rewrite, 09:12</p>
+          <dl class="receipt__rows">
+            <div><dt>Sent to</dt><dd>DeepSeek, on your key</dd></div>
+            <div><dt>Your selection</dt><dd>“Per my last email, the copy…”</dd></div>
+            <div><dt>Your question</dt><dd>Rewrite</dd></div>
+            <div><dt>Memory notes</dt><dd>Prefers short answers</dd></div>
+          </dl>
+          <dl class="receipt__rows receipt__rows--no">
+            <div><dt>Your screen</dt><dd>not included</dd></div>
+            <div><dt>Other windows</dt><dd>not included</dd></div>
+            <div><dt>Files on your PC</dt><dd>not included</dd></div>
+          </dl>
+          <div class="receipt__total"><span>Sent to Aside</span><b>0 bytes</b></div>
+          <p class="receipt__foot">There are no Aside servers.</p>
+        </div>
+      </figure>
+      <ul class="facts">
+        <li><strong>Your provider, your key.</strong> DeepSeek or Gemini for text, Qwen3-VL for captures, Tavily for web search if you add a key. Keys stay in Windows Credential Manager.</li>
+        <li><strong>No account.</strong> Nothing to sign up for, and nothing of yours on our side.</li>
+        <li><strong>Nothing kept.</strong> A conversation lasts until New chat or until you quit.</li>
+        <li><strong>Memory you can read.</strong> The one exception: a local file in plain sentences, off with one switch.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8. FAQ -->
+<section class="faq" id="faq" aria-labelledby="faq-title">
+  <div class="wrap faq__grid">
+    <div>
+      <p class="tag">questions</p>
+      <h2 id="faq-title" class="h2">Questions, <em>answered short.</em></h2>
+      <p class="body">Aside is question and answer, nothing else. Not a chat app, not a workspace, not an agent that acts for you.</p>
+    </div>
+    <div class="qa">
+      <details><summary>What does it cost?</summary><p>Aside has no subscription. You pay your model provider for what you use, on your own key. Text answers default to DeepSeek; Gemini is a switch in Settings.</p></details>
+      <details><summary>Which apps does it work in?</summary><p>Any app on Windows where you can select text, and anything on screen you can drag the orb over. Replace selection pastes back into the app you came from.</p></details>
+      <details><summary>Can it search the web?</summary><p>Yes, if you add a Tavily key. A “Searching for …” line shows while it looks.</p></details>
+      <details><summary>Will it act for me, or click things?</summary><p>No. It answers, and for how-to questions it lights up where to click. You do the clicking.</p></details>
+      <details><summary>Is there a Mac version?</summary><p>No. Aside is built on Windows itself: its trigger, selection and key storage are Windows parts.</p></details>
+      <details><summary>Does it follow dark mode?</summary><p>Yes. The panel and the orb follow your Windows app mode and switch live when you change it.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- 9. FINALE: the orb rises -->
+<section class="finale" id="download" aria-labelledby="dl-title">
+  <div class="wrap finale__inner">
+    <h2 id="dl-title" class="display display--close">Keep working.<br><span class="dot">Ask Aside.</span></h2>
+    <p class="lede">For Windows. Install it, add a DeepSeek key in Settings, and press Alt with Mouse 5.</p>
+    <div class="cta cta--center">
+      <a class="btn" id="dlBtn" href="https://github.com/siddharth-droid/aside/releases/latest"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
+    </div>
+  </div>
+  <div class="finale__slot" id="slotClose"></div>
+</section>
+
 </main>
 
+
+<!-- The footer is the horizon: the finale's orb rises from behind it. -->
 <footer class="foot">
   <div class="wrap foot__inner">
     <span class="wordmark wordmark--quiet"><span class="wordmark__dot" aria-hidden="true"></span>Aside</span>
-    <span>Quick answers at the edge of Windows.</span>
+    <p class="foot__say">Quick answers at the edge of Windows.</p>
+    <ul class="foot__links">
+      <li><a href="https://github.com/siddharth-droid/aside" data-mood="curious">Source on GitHub</a></li>
+      <li><a href="#privacy" data-mood="screenshot">Privacy</a></li>
+      <li><a href="#faq" data-mood="thinking">Questions</a></li>
+    </ul>
   </div>
 </footer>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=19"></script>
 </body>
 </html>

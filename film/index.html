@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      /* Built by src/build.py from src/template.html: edit those, then run `python src/build.py`. Look: SPEC.md. */
+      @font-face { font-family: "Apfel Grotezk"; src: url("assets/fonts/apfel-grotezk-regular.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Apfel Grotezk"; src: url("assets/fonts/apfel-grotezk-mittel.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "Apfel Grotezk"; src: url("assets/fonts/apfel-grotezk-fett.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Doto"; src: url("assets/fonts/doto-wght.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Instrument Serif"; src: url("assets/fonts/instrument-serif-italic.woff2") format("woff2"); font-style: italic; }
+      @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      :root {
+        --kraft: #e9dfca; --news: #f7f2e7; --ink: #141210; --red: #e2412f; --yellow: #f2c230; --blue: #2f5bd3; --teal: #4fc4bb;
+        --font: "Apfel Grotezk", sans-serif; --dot: "Doto", monospace; --serif-i: "Instrument Serif", serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--kraft); }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: var(--font); color: var(--ink); background: var(--kraft); }
+      #board { position: absolute; inset: 0; transform-origin: 50% 55%; }
+      #board::before { content: ""; position: absolute; inset: -60px; background-image: radial-gradient(rgba(20, 18, 16, 0.12) 1.4px, transparent 1.9px); background-size: 9px 9px; }
+      .piece { position: absolute; }
+      .in { position: relative; transform-origin: 50% 50%; }
+      .torn .in { clip-path: polygon(0 1.5%, 5% 0, 11% 1.2%, 18% 0, 26% 1.6%, 33% 0.4%, 41% 1.4%, 49% 0, 57% 1.2%, 65% 0, 73% 1.6%, 81% 0.4%, 89% 1.4%, 96% 0, 100% 1%, 99.4% 50%, 100% 98.6%, 94% 100%, 87% 98.6%, 79% 100%, 71% 98.4%, 63% 100%, 55% 98.8%, 47% 100%, 39% 98.4%, 31% 100%, 23% 98.6%, 15% 100%, 7% 98.4%, 0 99.4%, 0.6% 50%); }
+      .torn { filter: drop-shadow(6px 9px 10px rgba(40, 25, 10, 0.3)); }
+
+      .tag .in { display: inline-block; padding: 10px 22px 6px; background: var(--yellow); font: 800 76px/1 var(--dot); box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.2); }
+
+      .mail .in { background: var(--news); padding: 40px 48px 52px; }
+      .mail__head { font: 500 28px/1.3 var(--font); color: #6b645b; padding-bottom: 18px; border-bottom: 2px solid rgba(20, 18, 16, 0.12); margin-bottom: 22px; }
+      .mail__head b { font-weight: 700; color: var(--ink); margin-right: 10px; }
+      .mail__head i { font-style: normal; margin: 0 8px; }
+      .mail p { font: 500 36px/1.36 var(--font); letter-spacing: -0.01em; }
+      .mail__sent { position: relative; margin-top: 14px; min-height: 150px; }
+      .sent { position: relative; display: block; isolation: isolate; }
+      .sent--new { position: absolute; left: 0; top: 0; opacity: 0; color: var(--ink); }
+      .selbar { position: absolute; inset: -4px -8px; background: rgba(245, 167, 66, 0.5); transform-origin: 0 50%; transform: scaleX(0); z-index: -1; }
+      .ring { position: absolute; left: 24px; top: 126px; width: 900px; height: 240px; overflow: visible; }
+      .ring path { fill: none; stroke: var(--red); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 2400; stroke-dashoffset: 2400; }
+
+      .cast .in { width: 330px; height: 360px; }
+      .sticker { position: absolute; inset: 0; filter: drop-shadow(7px 0 0 #fff) drop-shadow(-7px 0 0 #fff) drop-shadow(0 7px 0 #fff) drop-shadow(0 -7px 0 #fff) drop-shadow(8px 12px 10px rgba(0, 0, 0, 0.3)); }
+      .sticker svg { width: 100%; height: auto; }
+      .sam-f, .sam-r { opacity: 0; }
+
+      .browser .in { width: 700px; height: 520px; background: #fff; }
+      .br__bar { display: flex; align-items: center; gap: 10px; height: 54px; padding: 0 20px; background: #dfe3e8; }
+      .br__bar i { width: 14px; height: 14px; border-radius: 50%; background: #b9c0c9; }
+      .br__url { flex: 1; height: 26px; margin-left: 16px; border-radius: 13px; background: #fff; }
+      .br__tabs { display: flex; gap: 6px; padding: 10px 16px; background: #eef1f4; }
+      .br__tabs span { width: 86px; height: 26px; border-radius: 6px; background: #d6dbe1; }
+      .br__tabs .is-on { background: #fff; box-shadow: inset 0 0 0 2px var(--ink); }
+      .br__chat { position: relative; padding: 26px 30px; }
+      .br__in { min-height: 170px; padding: 18px 20px; border-radius: 14px; background: #f1f3f6; font: 500 28px/1.34 var(--font); color: #2a2c31; }
+      #chatPaste, #chatExplain { display: inline; }
+      #chatPaste { opacity: 0; }
+      #chatExplain { color: #4a5568; clip-path: inset(0 100% 0 0); }
+      .br__wait { position: absolute; left: 50px; top: 230px; display: flex; gap: 10px; opacity: 0; }
+      .br__wait i { width: 16px; height: 16px; border-radius: 50%; background: #9aa3ae; }
+      .br__ans { margin-top: 18px; padding: 16px 20px; border-radius: 14px; background: #e3ecff; font: 500 28px/1.34 var(--font); opacity: 0; }
+      .tabring svg { width: 170px; overflow: visible; }
+      .tabring path, .arrow path, .lens circle, .lens path { fill: none; stroke: var(--red); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+      .tabring path { stroke-dasharray: 500; stroke-dashoffset: 500; }
+      .arrow svg { width: 300px; overflow: visible; }
+      .arrow .draw { stroke-dasharray: 8 14; stroke-dashoffset: 600; }
+      .arrow .head { opacity: 0; }
+      .lens .in { opacity: 0; }
+      .lens svg { width: 150px; overflow: visible; }
+
+      .keys .in { display: flex; align-items: center; gap: 10px; }
+      .key { display: inline-flex; align-items: center; justify-content: center; height: 64px; min-width: 64px; padding: 0 18px; background: #fff; color: var(--ink); font: 700 28px/1 var(--font); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 0 6px 0 var(--ink); }
+      .keys b { font: 700 32px var(--font); }
+      .keys--big .key { height: 84px; min-width: 84px; font-size: 36px; padding: 0 24px; border-radius: 14px; box-shadow: 0 8px 0 var(--ink); }
+
+      .stamp .in { display: inline-block; padding: 12px 22px 8px; border: 6px solid var(--red); color: var(--red); font: 800 44px/1 var(--dot); background: rgba(247, 242, 231, 0.85); }
+
+      .counter .in { display: flex; align-items: baseline; gap: 12px; padding: 14px 24px 10px; background: var(--ink); color: var(--news); box-shadow: 5px 6px 0 rgba(0, 0, 0, 0.22); }
+      .counter__l { font: italic 46px/1 var(--serif-i); }
+      .counter__n { display: inline-block; font: 800 92px/1 var(--dot); color: var(--yellow); }
+      .counter__of { font: 800 46px/1 var(--dot); opacity: 0.6; }
+
+      .dim .in { width: 1920px; height: 1080px; background: rgba(233, 223, 202, 0.72); opacity: 0; }
+      .ransom .in { white-space: nowrap; }
+      .r { display: inline-block; padding: 10px 26px 6px; font-size: 150px; line-height: 1; letter-spacing: -0.03em; box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.22); }
+      .r--ink { background: var(--ink); color: var(--news); font-family: var(--serif-i); font-style: italic; font-weight: 400; }
+      .r--red { background: var(--red); color: #fff; font-family: var(--serif-i); font-style: italic; }
+      .r--yellow { background: var(--yellow); font-weight: 700; letter-spacing: -0.06em; }
+      .r--blue { background: var(--blue); color: #fff; font-weight: 700; letter-spacing: -0.06em; }
+      .ransom--end .r { font-size: 168px; }
+
+      .orb .in { width: 560px; height: 560px; }
+      .orb img, .orbend img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #orbThink, #orbHappy { opacity: 0; }
+      .orbend .in { width: 840px; height: 840px; }
+
+      .panel .in { padding: 26px 30px 26px; border-radius: 26px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 80px), #1b1b1e; color: #d6d6da; font-family: "Geist", sans-serif; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12), 0 30px 60px -20px rgba(0, 0, 0, 0.6); opacity: 0; }
+      .panel__q { display: block; font-size: 28px; color: #8b8b92; }
+      .panel b { display: block; margin-top: 10px; font: 700 34px/1.3 Georgia, serif; color: #f4f4f5; }
+      .panel__b { display: block; margin-top: 10px; font-size: 28px; }
+      .panel__acts { display: flex; gap: 10px; margin-top: 20px; }
+      .panel__acts i { font-style: normal; padding: 8px 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.07); font-size: 28px; color: #f4f4f5; }
+      .panel__acts .on { background: rgba(255, 255, 255, 0.2); }
+
+      .echo .in { position: relative; min-height: 580px; padding: 44px 44px 40px 300px; background: var(--news); }
+      .echo__who { position: absolute; left: 24px; top: 40px; width: 250px; filter: drop-shadow(6px 0 0 #fff) drop-shadow(-6px 0 0 #fff) drop-shadow(0 6px 0 #fff) drop-shadow(0 -6px 0 #fff) drop-shadow(6px 10px 8px rgba(0, 0, 0, 0.28)); }
+      .echo__who svg { width: 100%; height: auto; }
+      .echo__who--done { opacity: 0; }
+      .echo__t { font: 800 34px/1 var(--dot); color: #9a5410; }
+      .echo__code { margin-top: 18px; padding: 16px 18px; background: #17181c; color: #ff9b9b; font: 500 28px/1.35 Consolas, monospace; border-radius: 10px; }
+      .echo__de { margin-top: 18px; font: 500 28px/1.4 var(--font); color: #2a2c31; }
+      .echo__ans { margin-top: 18px; padding: 18px 20px; border-radius: 16px; background: #1b1b1e; color: #d6d6da; font: 400 28px/1.4 "Geist", sans-serif; opacity: 0; }
+      .echo__ans b { display: block; margin-bottom: 6px; font: 700 28px/1.3 Georgia, serif; color: #f4f4f5; }
+      .echo__keys { position: relative; margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .echo__keys .key, .echo__keys b { opacity: 0; }
+      .echo__keys .key { height: 58px; min-width: 58px; font-size: 28px; padding: 0 14px; }
+
+      .dl .in { display: inline-block; padding: 14px 24px 10px; background: var(--news); font: 700 38px/1 var(--font); letter-spacing: -0.02em; box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.18); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="31.92" data-width="1920" data-height="1080" data-layout-allow-overflow data-layout-allow-overlap>
+      <div id="board">
+<div id="tag" class="clip piece tag" data-start="0.089" data-duration="31.831" data-track-index="1" style="z-index:5;left:120px;top:96px;"><div class="in" id="tag-in"><span>09:12</span></div></div>
+<div id="mail" class="clip piece mail torn" data-start="0.000" data-duration="23.486" data-track-index="1" style="z-index:4;left:120px;top:250px;width:930px;"><div class="in" id="mail-in">
+  <div class="mail__head"><b>To</b> Marta Lindqvist <i>·</i> Re: Thursday's launch review</div>
+  <p>Thanks for sending the deck over.</p>
+  <p class="mail__sent"><span id="sentOld" class="sent"><span id="selBar" class="selbar"></span>Per my last email, the copy deadline was Monday and we still don't have the final pricing page.</span><span id="sentNew" class="sent sent--new">The copy deadline was Monday, and we're still waiting on the final pricing page. Could we have it by Wednesday?</span></p>
+  <svg id="ring" class="ring" viewBox="0 0 900 220" preserveAspectRatio="none"><path d="M60 120 C40 40 300 12 520 20 C760 28 880 60 860 130 C840 200 560 214 330 206 C140 198 40 176 70 104" /></svg></div></div>
+<div id="sam" class="clip piece cast" data-start="1.150" data-duration="22.336" data-track-index="1" style="z-index:6;left:140px;top:545px;width:330px;"><div class="in" id="sam-in"><div class="sticker sam-n"><svg class="face" class="person person--sam" data-face="neutral" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p1h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p1f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p1b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  <circle cx="72" cy="92" r="26" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="96" cy="66" r="28" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="128" cy="60" r="30" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="158" cy="74" r="27" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="176" cy="104" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="66" cy="124" r="18" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="178" cy="134" r="16" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="112" cy="76" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="146" cy="88" r="20" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="72" cy="92" r="23" fill="#1f1a17"/><circle cx="96" cy="66" r="25" fill="#1f1a17"/><circle cx="128" cy="60" r="27" fill="#1f1a17"/><circle cx="158" cy="74" r="24" fill="#1f1a17"/><circle cx="176" cy="104" r="19" fill="#1f1a17"/><circle cx="66" cy="124" r="15" fill="#1f1a17"/><circle cx="178" cy="134" r="13" fill="#1f1a17"/><circle cx="112" cy="76" r="19" fill="#1f1a17"/><circle cx="146" cy="88" r="17" fill="#1f1a17"/>
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#ff5a1f" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p1h)" clip-path="url(#p1b)"/>
+  
+  
+  <path d="M92 200 q28 18 56 0" fill="none" stroke="#141210" stroke-width="3"/>
+  <rect x="104" y="166" width="32" height="40" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p1f)"><rect x="134" y="56" width="48" height="140" fill="url(#p1h)"/></g>
+  
+  
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 106 l20 -2 M132 104 l20 2" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="100" cy="123" rx="5" ry="6.5" fill="#141210"/><ellipse cx="140" cy="123" rx="5" ry="6.5" fill="#141210"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M108 156 h24" stroke="#141210" stroke-width="4" stroke-linecap="round"/>
+  
+</svg></div><div class="sticker sam-f"><svg class="face" class="person person--sam" data-face="frustrated" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p4h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p4f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p4b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  <circle cx="72" cy="92" r="26" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="96" cy="66" r="28" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="128" cy="60" r="30" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="158" cy="74" r="27" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="176" cy="104" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="66" cy="124" r="18" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="178" cy="134" r="16" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="112" cy="76" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="146" cy="88" r="20" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="72" cy="92" r="23" fill="#1f1a17"/><circle cx="96" cy="66" r="25" fill="#1f1a17"/><circle cx="128" cy="60" r="27" fill="#1f1a17"/><circle cx="158" cy="74" r="24" fill="#1f1a17"/><circle cx="176" cy="104" r="19" fill="#1f1a17"/><circle cx="66" cy="124" r="15" fill="#1f1a17"/><circle cx="178" cy="134" r="13" fill="#1f1a17"/><circle cx="112" cy="76" r="19" fill="#1f1a17"/><circle cx="146" cy="88" r="17" fill="#1f1a17"/>
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#ff5a1f" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p4h)" clip-path="url(#p4b)"/>
+  
+  
+  <path d="M92 200 q28 18 56 0" fill="none" stroke="#141210" stroke-width="3"/>
+  <rect x="104" y="166" width="32" height="40" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p4f)"><rect x="134" y="56" width="48" height="140" fill="url(#p4h)"/></g>
+  
+  
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 100 l20 8 M132 108 l20 -8" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="100" cy="123" rx="5" ry="6.5" fill="#141210"/><ellipse cx="140" cy="123" rx="5" ry="6.5" fill="#141210"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M104 160 q6 -6 12 0 t12 0 t8 -2" fill="none" stroke="#141210" stroke-width="4" stroke-linecap="round"/>
+  
+</svg></div><div class="sticker sam-r"><svg class="face" class="person person--sam" data-face="relieved" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p3h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p3f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p3b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  <circle cx="72" cy="92" r="26" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="96" cy="66" r="28" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="128" cy="60" r="30" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="158" cy="74" r="27" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="176" cy="104" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="66" cy="124" r="18" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="178" cy="134" r="16" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="112" cy="76" r="22" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="146" cy="88" r="20" fill="#1f1a17" stroke="#141210" stroke-width="3"/><circle cx="72" cy="92" r="23" fill="#1f1a17"/><circle cx="96" cy="66" r="25" fill="#1f1a17"/><circle cx="128" cy="60" r="27" fill="#1f1a17"/><circle cx="158" cy="74" r="24" fill="#1f1a17"/><circle cx="176" cy="104" r="19" fill="#1f1a17"/><circle cx="66" cy="124" r="15" fill="#1f1a17"/><circle cx="178" cy="134" r="13" fill="#1f1a17"/><circle cx="112" cy="76" r="19" fill="#1f1a17"/><circle cx="146" cy="88" r="17" fill="#1f1a17"/>
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#ff5a1f" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p3h)" clip-path="url(#p3b)"/>
+  
+  
+  <path d="M92 200 q28 18 56 0" fill="none" stroke="#141210" stroke-width="3"/>
+  <rect x="104" y="166" width="32" height="40" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#d9a07c" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p3f)"><rect x="134" y="56" width="48" height="140" fill="url(#p3h)"/></g>
+  
+  
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 104 q10 -5 20 0 M132 104 q10 -5 20 0" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><path d="M92 124 q8 -9 16 0 M132 124 q8 -9 16 0" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M106 152 q14 12 28 0" fill="none" stroke="#141210" stroke-width="4" stroke-linecap="round"/>
+  
+</svg></div></div></div>
+<div id="browser" class="clip piece browser torn" data-start="5.647" data-duration="9.858" data-track-index="1" style="z-index:7;left:1100px;top:230px;width:700px;height:600px;"><div class="in" id="browser-in"><div class="br__bar"><i></i><i></i><i></i><span class="br__url"></span></div>
+  <div class="br__tabs"><span></span><span></span><span class="is-on"></span><span></span><span></span><span></span></div>
+  <div class="br__chat">
+    <div id="chatIn" class="br__in"><span id="chatPaste">Per my last email, the copy deadline was Monday and we still don't have the final pricing page.</span> <span id="chatExplain">It's to Marta. Make it less passive-aggressive?</span></div>
+    <div id="chatWait" class="br__wait"><i></i><i></i><i></i></div>
+    <div id="chatAns" class="br__ans">The copy deadline was Monday, and we're still waiting on the final pricing page. Could we have it by Wednesday?</div>
+  </div></div></div>
+<div id="tabring" class="clip piece tabring" data-start="6.896" data-duration="8.609" data-track-index="1" style="z-index:9;left:1290px;top:300px;width:170px;"><div class="in" id="tabring-in"><svg viewBox="0 0 160 70"><path d="M14 38 C10 10 130 4 148 30 C160 56 40 70 18 50"/></svg></div></div>
+<div id="copy1" class="clip piece keys" data-start="4.821" data-duration="10.684" data-track-index="1" style="z-index:8;left:780px;top:520px;"><div class="in" id="copy1-in"><span class="key">Ctrl</span><span class="key">C</span></div></div>
+<div id="copy2" class="clip piece keys" data-start="10.000" data-duration="5.505" data-track-index="1" style="z-index:9;left:1500px;top:720px;"><div class="in" id="copy2-in"><span class="key">Ctrl</span><span class="key">C</span></div></div>
+<div id="stamp1" class="clip piece stamp" data-start="5.897" data-duration="9.608" data-track-index="1" style="z-index:11;left:1080px;top:210px;"><div class="in" id="stamp1-in"><span>app switch</span></div></div>
+<div id="stamp2" class="clip piece stamp" data-start="11.116" data-duration="4.389" data-track-index="1" style="z-index:11;left:700px;top:215px;"><div class="in" id="stamp2-in"><span>app switch</span></div></div>
+<div id="arrow1" class="clip piece arrow" data-start="5.747" data-duration="9.758" data-track-index="1" style="z-index:10;left:880px;top:110px;width:300px;"><div class="in" id="arrow1-in"><svg viewBox="0 0 300 160"><path class="draw" d="M10 140 C80 20 200 10 290 60"/><path class="head" d="M262 44 L292 62 L258 76"/></svg></div></div>
+<div id="arrow2" class="clip piece arrow" data-start="11.216" data-duration="4.289" data-track-index="1" style="z-index:10;left:900px;top:600px;width:300px;"><div class="in" id="arrow2-in"><svg viewBox="0 0 300 160"><path class="draw" d="M290 20 C220 150 100 160 10 110"/><path class="head" d="M40 92 L10 110 L44 126"/></svg></div></div>
+<div id="lens" class="clip piece lens" data-start="12.020" data-duration="3.485" data-track-index="1" style="z-index:12;left:300px;top:380px;width:150px;"><div class="in" id="lens-in"><svg viewBox="0 0 120 120"><circle cx="50" cy="50" r="36"/><path d="M76 76 L112 112"/></svg></div></div>
+<div id="counter" class="clip piece counter" data-start="4.821" data-duration="10.684" data-track-index="1" style="z-index:12;left:1480px;top:96px;"><div class="in" id="counter-in"><span class="counter__l">step</span><span id="cnt" class="counter__n">01</span><span class="counter__of">/08</span></div></div>
+<div id="dim" class="clip piece dim" data-start="12.969" data-duration="2.536" data-track-index="1" style="z-index:13;left:0;top:0;width:1920px;height:1080px;"><div class="in" id="dim-in"></div></div>
+<div id="big8" class="clip piece ransom" data-start="13.069" data-duration="2.436" data-track-index="1" style="z-index:14;left:420px;top:330px;"><div class="in" id="big8-in"><span class="r r--ink">8 steps</span></div></div>
+<div id="big2" class="clip piece ransom" data-start="13.672" data-duration="1.833" data-track-index="1" style="z-index:14;left:700px;top:560px;"><div class="in" id="big2-in"><span class="r r--red">2 app switches</span></div></div>
+<div id="orb" class="clip piece orb" data-start="17.779" data-duration="5.707" data-track-index="1" style="z-index:8;left:1440px;top:120px;width:560px;height:560px;"><div class="in" id="orb-in"><img id="orbIdle" src="assets/orb/orb-idle-left.png" alt=""><img id="orbThink" src="assets/orb/orb-thinking.png" alt=""><img id="orbHappy" src="assets/orb/orb-happy.png" alt=""></div></div>
+<div id="panel" class="clip piece panel" data-start="18.772" data-duration="1.270" data-track-index="1" style="z-index:9;left:1130px;top:420px;width:640px;"><div class="in" id="panel-in"><span class="panel__q">Rewrite the selection</span>
+  <b>The copy deadline was Monday, and we're still waiting on the final pricing page.</b><span class="panel__b">Could we have it by Wednesday?</span>
+  <span class="panel__acts"><i>Copy</i><i class="on">Replace selection</i></span></div></div>
+<div id="k1" class="clip piece keys keys--big" data-start="18.047" data-duration="5.439" data-track-index="1" style="z-index:8;left:540px;top:690px;"><div class="in" id="k1-in"><span class="key">Alt</span><b>+</b><span class="key">Mouse 5</span></div></div>
+<div id="k2" class="clip piece keys keys--big" data-start="18.772" data-duration="4.714" data-track-index="1" style="z-index:8;left:950px;top:690px;"><div class="in" id="k2-in"><span class="key">Ctrl</span><span class="key">R</span></div></div>
+<div id="k3" class="clip piece keys keys--big" data-start="19.542" data-duration="3.944" data-track-index="1" style="z-index:8;left:1210px;top:690px;"><div class="in" id="k3-in"><span class="key">Ctrl</span><span class="key">Enter</span></div></div>
+<div id="three" class="clip piece ransom" data-start="20.446" data-duration="3.040" data-track-index="1" style="z-index:9;left:600px;top:830px;"><div class="in" id="three-in"><span class="r r--yellow">3 keys.</span></div></div>
+<div id="ade" class="clip piece echo torn" data-start="23.036" data-duration="5.439" data-track-index="1" style="z-index:6;left:110px;top:220px;width:820px;"><div class="in" id="ade-in"><div class="echo__who"><svg class="face" class="person person--ade" data-face="thinking" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p12h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p12f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p12b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#2f5bd3" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p12h)" clip-path="url(#p12b)"/>
+  <path d="M74 204 C84 222 156 222 166 204" fill="none" stroke="#141210" stroke-width="3"/><path d="M106 214 v26 M134 214 v26" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  
+  
+  <rect x="104" y="166" width="32" height="40" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p12f)"><rect x="134" y="56" width="48" height="140" fill="url(#p12h)"/></g>
+  
+  <path d="M64 118 C60 70 92 52 122 52 C156 52 182 72 176 118 C170 98 156 86 122 86 C92 86 72 96 64 118Z" fill="#141210" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 104 l20 -1 M132 98 l20 -4" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="103" cy="120" rx="5" ry="6.5" fill="#141210"/><ellipse cx="143" cy="120" rx="5" ry="6.5" fill="#141210"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M110 158 q10 -4 22 2" fill="none" stroke="#141210" stroke-width="4" stroke-linecap="round"/>
+  <g fill="none" stroke="#141210" stroke-width="3.5"><circle cx="100" cy="123" r="15"/><circle cx="140" cy="123" r="15"/><path d="M115 121 q5 -4 10 0 M85 120 l-17 -4 M155 120 l17 -4"/></g>
+</svg></div><div class="echo__who echo__who--done"><svg class="face" class="person person--ade" data-face="surprised" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p11h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p11f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p11b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#2f5bd3" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p11h)" clip-path="url(#p11b)"/>
+  <path d="M74 204 C84 222 156 222 166 204" fill="none" stroke="#141210" stroke-width="3"/><path d="M106 214 v26 M134 214 v26" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  
+  
+  <rect x="104" y="166" width="32" height="40" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#8a5638" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p11f)"><rect x="134" y="56" width="48" height="140" fill="url(#p11h)"/></g>
+  
+  <path d="M64 118 C60 70 92 52 122 52 C156 52 182 72 176 118 C170 98 156 86 122 86 C92 86 72 96 64 118Z" fill="#141210" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 96 q10 -8 20 -2 M132 94 q10 -6 20 2" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="100" cy="123" rx="5" ry="8" fill="#141210"/><ellipse cx="140" cy="123" rx="5" ry="8" fill="#141210"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="120" cy="158" rx="8" ry="10" fill="#141210"/>
+  <g fill="none" stroke="#141210" stroke-width="3.5"><circle cx="100" cy="123" r="15"/><circle cx="140" cy="123" r="15"/><path d="M115 121 q5 -4 10 0 M85 120 l-17 -4 M155 120 l17 -4"/></g>
+</svg></div>
+  <p class="echo__t">11:40 · Ade</p>
+  <p class="echo__code">Uncaught TypeError: Cannot read properties of undefined (reading 'map')</p>
+  <div class="echo__ans" id="adeAns"><b>items is undefined the first time the list draws.</b> Start from an empty list: useState([]).</div>
+  <div class="keys echo__keys" id="adeKeys"><span class="key">Alt</span><b>+</b><span class="key">Mouse 5</span><span class="key">Enter</span><span class="key">Ctrl Shift C</span></div></div></div>
+<div id="tom" class="clip piece echo torn" data-start="24.587" data-duration="3.888" data-track-index="1" style="z-index:6;left:990px;top:250px;width:820px;"><div class="in" id="tom-in"><div class="echo__who"><svg class="face" class="person person--tom" data-face="frustrated" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p16h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p16f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p16b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#f2c230" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p16h)" clip-path="url(#p16b)"/>
+  
+  <path d="M100 198 l20 26 l20 -26" fill="#fff" stroke="#141210" stroke-width="3" stroke-linejoin="round"/><circle cx="120" cy="238" r="3" fill="#141210"/>
+  
+  <rect x="104" y="166" width="32" height="40" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p16f)"><rect x="134" y="56" width="48" height="140" fill="url(#p16h)"/></g>
+  <path d="M74 140 C78 186 104 196 120 196 C136 196 162 186 166 140 C156 160 140 166 120 166 C100 166 84 160 74 140Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M64 132 C60 112 64 96 72 92 L76 128Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M176 132 C180 112 176 96 168 92 L164 128Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 100 l20 8 M132 108 l20 -8" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="100" cy="123" rx="5" ry="6.5" fill="#141210"/><ellipse cx="140" cy="123" rx="5" ry="6.5" fill="#141210"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M104 160 q6 -6 12 0 t12 0 t8 -2" fill="none" stroke="#5a4a3c" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#ffffff22" stroke="#141210" stroke-width="3.5"><rect x="86" y="128" width="26" height="15" rx="4"/><rect x="128" y="128" width="26" height="15" rx="4"/><path d="M112 134 h16 M86 132 l-18 -8 M154 132 l18 -8" fill="none"/></g>
+</svg></div><div class="echo__who echo__who--done"><svg class="face" class="person person--tom" data-face="happy" viewBox="0 0 240 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="p14h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.6" fill="#141210" opacity=".28"/></pattern>
+    <clipPath id="p14f"><ellipse cx="120" cy="124" rx="54" ry="62"/></clipPath>
+    <clipPath id="p14b"><path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z"/></clipPath>
+  </defs>
+  
+  <path d="M22 262 C26 214 60 196 120 196 C180 196 214 214 218 262Z" fill="#f2c230" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="138" y="196" width="90" height="70" fill="url(#p14h)" clip-path="url(#p14b)"/>
+  
+  <path d="M100 198 l20 26 l20 -26" fill="#fff" stroke="#141210" stroke-width="3" stroke-linejoin="round"/><circle cx="120" cy="238" r="3" fill="#141210"/>
+  
+  <rect x="104" y="166" width="32" height="40" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="66" cy="128" rx="9" ry="13" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="174" cy="128" rx="9" ry="13" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <ellipse cx="120" cy="124" rx="54" ry="62" fill="#efc29f" stroke="#141210" stroke-width="3"/>
+  <g clip-path="url(#p14f)"><rect x="134" y="56" width="48" height="140" fill="url(#p14h)"/></g>
+  <path d="M74 140 C78 186 104 196 120 196 C136 196 162 186 166 140 C156 160 140 166 120 166 C100 166 84 160 74 140Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M64 132 C60 112 64 96 72 92 L76 128Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M176 132 C180 112 176 96 168 92 L164 128Z" fill="#c9c3b8" stroke="#141210" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="94" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/><ellipse cx="146" cy="146" rx="9" ry="5" fill="#e4685c" opacity=".35"/>
+  <path d="M88 102 q10 -6 20 -2 M132 100 q10 -4 20 2" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/><path d="M92 124 q8 -9 16 0 M132 124 q8 -9 16 0" fill="none" stroke="#141210" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M120 128 q-6 14 2 16" fill="none" stroke="#141210" stroke-width="3" stroke-linecap="round"/>
+  <path d="M102 150 q18 20 36 0 Z" fill="#5a4a3c"/><path d="M110 156 q10 6 20 0" fill="#e4685c"/>
+  <g fill="#ffffff22" stroke="#141210" stroke-width="3.5"><rect x="86" y="128" width="26" height="15" rx="4"/><rect x="128" y="128" width="26" height="15" rx="4"/><path d="M112 134 h16 M86 132 l-18 -8 M154 132 l18 -8" fill="none"/></g>
+</svg></div>
+  <p class="echo__t">17:30 · Tom</p>
+  <p class="echo__de" lang="de">Ihr Antrag wurde eingereicht. Bitte laden Sie innerhalb von 14 Tagen eine Kopie Ihres Ausweises hoch.</p>
+  <div class="echo__ans" id="tomAns"><b>Your application was submitted.</b> Please upload a copy of your ID within 14 days.</div>
+  <div class="keys echo__keys" id="tomKeys"><span class="key">Alt</span><b>+</b><span class="key">Mouse 5</span><span class="key">Ctrl T</span><span class="key">Ctrl Shift C</span></div></div></div>
+<div id="keep" class="clip piece ransom ransom--end" data-start="28.125" data-duration="3.795" data-track-index="1" style="z-index:10;left:150px;top:300px;"><div class="in" id="keep-in"><span class="r r--ink">Keep</span> <span class="r r--yellow">working.</span></div></div>
+<div id="askaside" class="clip piece ransom ransom--end" data-start="29.007" data-duration="2.913" data-track-index="1" style="z-index:10;left:190px;top:500px;"><div class="in" id="askaside-in"><span class="r r--red">Ask</span> <span class="r r--blue">Aside.</span></div></div>
+<div id="dl" class="clip piece dl" data-start="29.607" data-duration="2.313" data-track-index="1" style="z-index:10;left:200px;top:760px;"><div class="in" id="dl-in"><span>Free for Windows · bring your own key</span></div></div>
+<div id="orbEnd" class="clip piece orbend" data-start="29.157" data-duration="2.763" data-track-index="1" style="z-index:9;left:1080px;top:180px;width:840px;height:840px;"><div class="in" id="orbEnd-in"><img src="assets/orb/orb-happy.png" alt=""></div></div>
+      </div>
+<audio id="vo" class="clip" src="assets/voice.mp3" data-start="0" data-duration="29.921" data-track-index="20" data-volume="1"></audio>
+<audio id="bgm" class="clip" src="assets/bgm/track.wav" data-start="0" data-duration="31.920" data-track-index="21" data-volume="0.14" data-fade-out="1.5"></audio>
+<audio id="sfx00" class="clip" src="assets/sfx/slap.mp3" data-start="0.089" data-duration="0.4" data-track-index="22" data-volume="0.55"></audio>
+<audio id="sfx01" class="clip" src="assets/sfx/slap.mp3" data-start="1.150" data-duration="0.4" data-track-index="23" data-volume="0.55"></audio>
+<audio id="sfx02" class="clip" src="assets/sfx/marker.mp3" data-start="2.098" data-duration="0.85" data-track-index="24" data-volume="0.6"></audio>
+<audio id="sfx03" class="clip" src="assets/sfx/key.mp3" data-start="4.821" data-duration="0.45" data-track-index="22" data-volume="0.6"></audio>
+<audio id="sfx04" class="clip" src="assets/sfx/whoosh.mp3" data-start="5.647" data-duration="1.4" data-track-index="23" data-volume="0.35"></audio>
+<audio id="sfx05" class="clip" src="assets/sfx/slap.mp3" data-start="5.897" data-duration="0.4" data-track-index="24" data-volume="0.55"></audio>
+<audio id="sfx06" class="clip" src="assets/sfx/key.mp3" data-start="7.790" data-duration="0.45" data-track-index="22" data-volume="0.6"></audio>
+<audio id="sfx07" class="clip" src="assets/sfx/key.mp3" data-start="10.000" data-duration="0.45" data-track-index="23" data-volume="0.6"></audio>
+<audio id="sfx08" class="clip" src="assets/sfx/slap.mp3" data-start="11.116" data-duration="0.4" data-track-index="24" data-volume="0.55"></audio>
+<audio id="sfx09" class="clip" src="assets/sfx/whoosh.mp3" data-start="12.020" data-duration="1.4" data-track-index="22" data-volume="0.35"></audio>
+<audio id="sfx10" class="clip" src="assets/sfx/slap.mp3" data-start="13.069" data-duration="0.4" data-track-index="23" data-volume="0.55"></audio>
+<audio id="sfx11" class="clip" src="assets/sfx/slap.mp3" data-start="13.672" data-duration="0.4" data-track-index="24" data-volume="0.55"></audio>
+<audio id="sfx12" class="clip" src="assets/sfx/rip.mp3" data-start="14.955" data-duration="0.4" data-track-index="22" data-volume="0.8"></audio>
+<audio id="sfx13" class="clip" src="assets/sfx/slap.mp3" data-start="16.272" data-duration="0.4" data-track-index="23" data-volume="0.55"></audio>
+<audio id="sfx14" class="clip" src="assets/sfx/whoosh.mp3" data-start="17.779" data-duration="1.4" data-track-index="24" data-volume="0.35"></audio>
+<audio id="sfx15" class="clip" src="assets/sfx/key.mp3" data-start="18.047" data-duration="0.45" data-track-index="22" data-volume="0.6"></audio>
+<audio id="sfx16" class="clip" src="assets/sfx/key.mp3" data-start="18.772" data-duration="0.45" data-track-index="23" data-volume="0.6"></audio>
+<audio id="sfx17" class="clip" src="assets/sfx/key.mp3" data-start="19.542" data-duration="0.45" data-track-index="24" data-volume="0.6"></audio>
+<audio id="sfx18" class="clip" src="assets/sfx/slap.mp3" data-start="20.446" data-duration="0.4" data-track-index="22" data-volume="0.55"></audio>
+<audio id="sfx19" class="clip" src="assets/sfx/whoosh.mp3" data-start="23.036" data-duration="1.4" data-track-index="23" data-volume="0.35"></audio>
+<audio id="sfx20" class="clip" src="assets/sfx/slap.mp3" data-start="23.694" data-duration="0.4" data-track-index="24" data-volume="0.55"></audio>
+<audio id="sfx21" class="clip" src="assets/sfx/whoosh.mp3" data-start="24.587" data-duration="1.4" data-track-index="22" data-volume="0.35"></audio>
+<audio id="sfx22" class="clip" src="assets/sfx/slap.mp3" data-start="25.424" data-duration="0.4" data-track-index="23" data-volume="0.55"></audio>
+<audio id="sfx23" class="clip" src="assets/sfx/key.mp3" data-start="26.931" data-duration="0.45" data-track-index="24" data-volume="0.6"></audio>
+<audio id="sfx24" class="clip" src="assets/sfx/key.mp3" data-start="27.299" data-duration="0.45" data-track-index="22" data-volume="0.6"></audio>
+<audio id="sfx25" class="clip" src="assets/sfx/slap.mp3" data-start="28.125" data-duration="0.4" data-track-index="23" data-volume="0.55"></audio>
+<audio id="sfx26" class="clip" src="assets/sfx/slap.mp3" data-start="29.007" data-duration="0.4" data-track-index="24" data-volume="0.55"></audio>
+    </div>
+    <script>
+
+const T = {"tag": 0.089, "sam": 1.15, "circle": 2.098, "copy": 4.821, "browser": 5.647, "tabs": 6.696, "paste": 7.79, "explain": 8.538, "wait": 9.375, "answer": 10.0, "switch": 11.116, "findplace": 12.02, "eight": 13.069, "two": 13.672, "rip": 14.955, "morning": 16.272, "select": 16.953, "press": 17.779, "trigger": 18.047, "rewrite": 18.772, "putback": 19.542, "three": 20.446, "sam2": 21.529, "ade": 23.036, "explained": 23.694, "tom": 24.587, "translated": 25.424, "same3": 26.429, "three2": 26.931, "keys2": 27.299, "keep": 28.125, "ask": 29.007};
+const tl = gsap.timeline({ paused: true });
+const $ = (s) => document.querySelector(s);
+const slap = (sel, t, rot = 0) => tl.fromTo(sel + "-in", { scale: 1.14, rotation: rot + 5, opacity: 0 }, { scale: 1, rotation: rot, opacity: 1, duration: 0.23, ease: "back.out(2.2)" }, t);
+const tear = (sels, t) => sels.forEach((s, i) => tl.to(s + "-in", { x: 2100, y: -80 + i * 12, rotation: 18 + i * 3, duration: 0.45, ease: "power3.in" }, t + i * 0.067));
+const punch = (sel, t) => { tl.to(sel, { scale: 1.25, duration: 0.04 }, t); tl.to(sel, { scale: 1, duration: 0.22, ease: "back.out(3)" }, t + 0.04); };
+const swap = (show, hide, t) => { tl.set(show, { opacity: 1 }, t); tl.set(hide, { opacity: 0 }, t); };
+
+// resting angles for every piece (paper is never square)
+const rest = { "#tag": -4, "#mail": -1, "#sam": 2, "#browser": 2.5, "#copy1": -6, "#copy2": 5, "#stamp1": -9, "#stamp2": 7, "#counter": 3, "#big8": -3, "#big2": 2,
+  "#panel": -1.5, "#k1": -3, "#k2": 4, "#k3": -2, "#three": -4, "#ade": -1.5, "#tom": 1.8, "#keep": -2, "#askaside": 2, "#dl": -1 };
+
+// Act 1
+slap("#tag", T.tag, rest["#tag"]);
+tl.set("#mail-in", { rotation: rest["#mail"] }, 0);
+slap("#sam", T.sam, rest["#sam"]);
+tl.fromTo("#ring path", { strokeDashoffset: 2400 }, { strokeDashoffset: 0, duration: 0.75, ease: "power1.inOut" }, T.circle);
+tl.to("#ring", { opacity: 0, duration: 0.2 }, T.copy - 0.3);
+slap("#copy1", T.copy, rest["#copy1"]);
+slap("#counter", T.copy, rest["#counter"]);
+slap("#browser", T.browser, rest["#browser"]);
+tl.fromTo("#arrow1 .draw", { strokeDashoffset: 600 }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out" }, T.browser + 0.1);
+tl.fromTo("#arrow1 .head", { opacity: 0 }, { opacity: 1, duration: 0.05 }, T.browser + 0.4);
+slap("#stamp1", T.browser + 0.25, rest["#stamp1"]);
+tl.fromTo("#tabring path", { strokeDashoffset: 500 }, { strokeDashoffset: 0, duration: 0.4 }, T.tabs + 0.2);
+tl.fromTo("#chatPaste", { opacity: 0 }, { opacity: 1, duration: 0.08 }, T.paste);
+tl.fromTo("#chatExplain", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.7, ease: "none" }, T.explain);
+tl.fromTo("#chatWait", { opacity: 0 }, { opacity: 1, duration: 0.05 }, T.wait);
+tl.fromTo("#chatWait i", { y: 0 }, { y: -10, duration: 0.15, stagger: 0.1, yoyo: true, repeat: 3, ease: "sine.inOut" }, T.wait);
+tl.to("#chatWait", { opacity: 0, duration: 0.05 }, T.answer - 0.05);
+tl.fromTo("#chatAns", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, T.answer - 0.05);
+slap("#copy2", T.answer, rest["#copy2"]);
+slap("#stamp2", T.switch, rest["#stamp2"]);
+tl.fromTo("#arrow2 .draw", { strokeDashoffset: 600 }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out" }, T.switch + 0.1);
+tl.fromTo("#arrow2 .head", { opacity: 0 }, { opacity: 1, duration: 0.05 }, T.switch + 0.4);
+tl.fromTo("#lens-in", { x: 0, opacity: 0 }, { x: 420, opacity: 1, duration: 0.9, ease: "sine.inOut" }, T.findplace);
+swap(".sam-f", ".sam-n", T.wait);
+const steps = [T.copy, T.browser, T.tabs, T.paste, T.wait, T.answer, T.switch, T.findplace];
+steps.forEach((t, i) => { tl.set("#cnt", { textContent: String(i + 1).padStart(2, "0") }, t); tl.fromTo("#cnt", { scale: 1.3 }, { scale: 1, duration: 0.18, ease: "back.out(3)" }, t); });
+tl.fromTo("#dim-in", { opacity: 0 }, { opacity: 1, duration: 0.15 }, T.eight - 0.1);
+slap("#big8", T.eight, rest["#big8"]);
+slap("#big2", T.two, rest["#big2"]);
+// the rip: everything from the old way tears off to the right
+tear(["#big2", "#big8", "#browser", "#stamp1", "#stamp2", "#counter", "#copy2", "#copy1", "#arrow1", "#arrow2", "#tabring", "#lens"], T.rip);
+tl.to("#dim-in", { opacity: 0, duration: 0.25 }, T.rip + 0.15);
+swap(".sam-n", ".sam-f", T.rip + 0.3);
+punch("#tag-in", T.morning);
+
+// Act 2
+tl.fromTo("#selBar", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "none" }, T.select);
+tl.fromTo("#orb-in", { x: 520 }, { x: 0, duration: 0.55, ease: "power3.out" }, T.press);
+swap("#orbThink", "#orbIdle", T.rewrite);
+slap("#k1", T.trigger, rest["#k1"]);
+slap("#k2", T.rewrite, rest["#k2"]);
+tl.fromTo("#panel-in", { scale: 0.3, opacity: 0, transformOrigin: "100% 0%" }, { scale: 1, opacity: 1, rotation: rest["#panel"], duration: 0.35, ease: "power3.out" }, T.rewrite + 0.1);
+swap("#orbHappy", "#orbThink", T.rewrite + 0.55);
+slap("#k3", T.putback, rest["#k3"]);
+tl.to("#panel-in", { scale: 0.2, opacity: 0, duration: 0.3, ease: "power3.in" }, T.putback + 0.12);
+tl.set("#sentOld", { opacity: 0 }, T.putback + 0.3);
+tl.set("#sentNew", { opacity: 1 }, T.putback + 0.3);
+tl.fromTo("#sentNew", { backgroundColor: "rgba(79,196,187,0.45)" }, { backgroundColor: "rgba(79,196,187,0.12)", duration: 1.6 }, T.putback + 0.3);
+slap("#three", T.three, rest["#three"]);
+swap(".sam-r", ".sam-n", T.sam2);
+// Sam's board slides out to the left, Ade's and Tom's slap in
+tl.to(["#mail-in", "#sam-in", "#k1-in", "#k2-in", "#k3-in", "#three-in", "#tag-in"], { x: -1500, rotation: -12, duration: 0.42, ease: "power3.in", stagger: 0.03 }, T.ade - 0.15);
+tl.to("#orb-in", { x: 520, duration: 0.4, ease: "power3.in" }, T.ade - 0.15);
+tl.set("#tag-in", { x: 0, rotation: rest["#tag"] }, T.ade + 0.4);
+tl.set("#tag span", { textContent: "11:40" }, T.ade + 0.4);
+tl.set("#tag-in", { opacity: 1 }, T.ade + 0.4); punch("#tag-in", T.ade + 0.4);
+tl.set("#tag span", { textContent: "17:30" }, T.tom);
+punch("#tag-in", T.tom);
+
+// Act 3
+slap("#ade", T.ade, rest["#ade"]);
+tl.fromTo("#adeAns", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }, T.explained);
+swap("#ade .echo__who--done", "#ade .echo__who:not(.echo__who--done)", T.explained);
+slap("#tom", T.tom, rest["#tom"]);
+tl.fromTo("#tomAns", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.25, ease: "power2.out" }, T.translated);
+swap("#tom .echo__who--done", "#tom .echo__who:not(.echo__who--done)", T.translated);
+tl.fromTo("#adeKeys .key, #adeKeys b", { scale: 1.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18, stagger: 0.08, ease: "back.out(3)" }, T.three2);
+tl.fromTo("#tomKeys .key, #tomKeys b", { scale: 1.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.18, stagger: 0.08, ease: "back.out(3)" }, T.keys2);
+tear(["#tom", "#ade", "#tag"], T.keep - 0.25);
+
+// Act 4
+slap("#keep", T.keep, rest["#keep"]);
+slap("#askaside", T.ask, rest["#askaside"]);
+tl.fromTo("#orbEnd-in", { y: 700 }, { y: 0, duration: 0.9, ease: "power3.out" }, T.ask + 0.15);
+slap("#dl", T.ask + 0.6, rest["#dl"]);
+
+// the board drifts closer through each act (a slow push, never while a line is read on its own)
+tl.set("#board", { transformOrigin: "0% 20%" }, 0);
+tl.fromTo("#board", { scale: 1.45 }, { scale: 1.52, duration: T.browser - 0.25, ease: "sine.inOut" }, 0);
+tl.to("#board", { scale: 1, duration: 0.6, ease: "power3.inOut" }, T.browser - 0.25);
+tl.to("#board", { scale: 1.03, duration: T.rip - T.browser - 0.4, ease: "sine.inOut" }, T.browser + 0.35);
+tl.to("#board", { scale: 1.42, duration: 0.7, ease: "power3.inOut" }, T.rip + 0.45);
+tl.to("#board", { scale: 1, duration: 0.55, ease: "power3.inOut" }, T.press - 0.2);
+tl.to("#board", { scale: 1.03, duration: T.ade - T.press - 0.5, ease: "sine.inOut" }, T.press + 0.35);
+tl.to("#board", { scale: 1, duration: 0.4, ease: "power2.out" }, T.ade);
+
+// paper boil: stickers shiver on twos, like hand-moved cut-outs
+[["#sam .face", 0, 31.92], ["#ade .face", T.ade, T.keep], ["#tom .face", T.tom, T.keep]].forEach(([sel, a, b]) => {
+  for (let t = a, k = 0; t < b; t += 0.267, k++) tl.set(sel, { rotation: [0, 0.7, -0.5, 0.3][k % 4], x: [0, 1, -1, 0][k % 4] }, t);
+});
+
+window.__timelines["main"] = tl;
+tl.seek(0);
+
+    </script>
+  </body>
+</html>

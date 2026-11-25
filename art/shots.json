@@ -1,0 +1,21 @@
+{
+  "rules": "The Aside orb must match the reference image exactly in character: a frosted-glass sphere with a warm amber light glowing inside and two small dark-brown oval eyes, no mouth, no arms, no legs, no accessories. It is small (about the size of a coin relative to the monitor) and sits half-peeking from the RIGHT edge of the computer screen, casting a soft warm glow. People are original characters, not real or famous people. No readable text, no logos, no brand names, no Windows or Apple logos, no watermarks, no captions. Wide cinematic composition with calm negative space on the left third for a headline.",
+  "styles": {
+    "storybook": "Hand-painted gouache storybook illustration, visible brush and paper texture, soft edges, limited palette of deep ink blue, warm cream and amber, the orb is the warmest light source in the scene, gentle rim light on the character, cosy and quiet mood, editorial picture-book quality like a premium New Yorker or Apple illustration.",
+    "riso": "Flat editorial illustration with risograph print grain, bold simple shapes, slightly off-register two-tone printing in ink blue and warm amber on cream paper, playful but calm, characterful people with expressive simple faces, modern startup illustration quality."
+  },
+  "shots": {
+    "test-storybook": {
+      "style": "storybook",
+      "aspect": "16:9",
+      "refs": ["ref/orb-hero.png"],
+      "prompt": "A young writer sits at a desk late in the evening, writing an email on a monitor. They have just selected a sentence and look relieved, half-smiling, as a small answer panel opens beside the glowing Aside orb at the right edge of their screen. Desk lamp off; the room is lit mostly by the screen and the orb's warm light. A mug, a plant, a window with dusk sky."
+    },
+    "test-riso": {
+      "style": "riso",
+      "aspect": "16:9",
+      "refs": ["ref/orb-hero.png"],
+      "prompt": "A young writer sits at a desk late in the evening, writing an email on a monitor. They have just selected a sentence and look relieved, half-smiling, as a small answer panel opens beside the glowing Aside orb at the right edge of their screen. A mug, a plant, a window with dusk sky."
+    }
+  }
+}

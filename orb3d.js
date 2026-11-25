@@ -1,4 +1,4 @@
-// The Aside orb, ported from tauri-app/src/components/mascot/OrbGL.tsx (same shaders, Ink look).
+// The Aside orb, ported from tauri-app/src/components/mascot/OrbGL.tsx (same shaders, Ink and Paper looks).
 // One full-viewport transparent canvas; the orb is placed in screen pixels every frame.
 import * as THREE from "./vendor/three.module.js";
 
@@ -9,8 +9,14 @@ const MOOD = {
   thinking: { center: "#f2c98a", edge: "#c9894a", brightness: 0.6, eyes: [1, 0, 0], rightEye: 1, tilt: 0, gaze: { x: 0.35, y: 1 }, swirl: 1, blinks: false, spread: 0.9 },
   screenshot: { center: "#ffb8a8", edge: "#ff7f6e", brightness: 1.1, eyes: [0, 0, 1], rightEye: 1, tilt: 0, gaze: { x: 0, y: 0 }, swirl: 0, blinks: false, spread: 1.25 },
 };
-const INK = { eye: "#2e1f16", rim: 0.8, rimColor: "#ffe9d2", coreBoost: 1.35, satBoost: 1.2 };
-const SHELL = { milk: [0.2, 0.205, 0.235], edge: [0.33, 0.335, 0.37], band: [0.1, 0.1, 0.12], clear: 0.35, sheen: 0.06, shadowOpacity: 0.5 };
+// Both looks, values from the app (mascot/tokens.ts and OrbGL.tsx SHELL). Paper is milky glass for light pages.
+const LOOKS = {
+  ink: { eye: "#2e1f16", rim: 0.8, rimColor: "#ffe9d2", coreBoost: 1.35, satBoost: 1.2, dark: 1,
+    shell: { milk: [0.2, 0.205, 0.235], band: [0.1, 0.1, 0.12], clear: 0.35, sheen: 0.06, shadow: [0, 0, 0], shadowOpacity: 0.5 } },
+  paper: { eye: "#47362f", rim: 0.25, rimColor: "#fffaf2", coreBoost: 1, satBoost: 1, dark: 0,
+    shell: { milk: [0.885, 0.88, 0.885], band: [0.74, 0.725, 0.725], clear: 0.55, sheen: 0.07, shadow: [0.25, 0.2, 0.16], shadowOpacity: 0.22 } },
+};
+let INK = LOOKS.ink; // the active look; set by createOrb3D
 
 const hexRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 function coreRgb(hex) {
@@ -136,8 +142,10 @@ export function hasWebGL2() {
  * createOrb3D(canvas, { target, reduced })
  * target(): { x, y, size } in CSS pixels, read every frame; the orb eases between targets when the slot changes.
  */
-export function createOrb3D(canvas, { target, reduced = false, onFrame = null, focus = null }) {
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+export function createOrb3D(canvas, { target, reduced = false, onFrame = null, focus = null, look = "ink" }) {
+  INK = LOOKS[look] || LOOKS.ink;
+  const SHELL = INK.shell;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: true });
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   // A very narrow field of view from far away: almost orthographic, so an orb near the window edge
@@ -147,7 +155,7 @@ export function createOrb3D(canvas, { target, reduced = false, onFrame = null, f
 
   const U = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, { value: v }]));
   const bodyU = U({ uCenter: new THREE.Vector3(), uEdge: new THREE.Vector3(), uMilk: new THREE.Vector3(...SHELL.milk), uRimColor: new THREE.Vector3(...hexRgb(INK.rimColor)),
-    uIntensity: 1, uSwirl: 0, uTime: 0, uRim: INK.rim, uSheen: SHELL.sheen, uSpread: 1, uBand: new THREE.Vector3(...SHELL.band), uClear: SHELL.clear, uDark: 1, uFlat: 1 });
+    uIntensity: 1, uSwirl: 0, uTime: 0, uRim: INK.rim, uSheen: SHELL.sheen, uSpread: 1, uBand: new THREE.Vector3(...SHELL.band), uClear: SHELL.clear, uDark: INK.dark, uFlat: 1 });
   const EYE_PLANE = new THREE.Vector2(1.6, 0.9);
   const eyeU = U({ uColor: new THREE.Vector3(...hexRgb(INK.eye)), uShape: new THREE.Vector3(1, 0, 0), uLook: new THREE.Vector2(), uRight: 1, uBlink: 0, uPlane: EYE_PLANE });
   const haloU = U({ uColor: new THREE.Vector3(), uOpacity: 0 });
@@ -251,7 +259,7 @@ export function createOrb3D(canvas, { target, reduced = false, onFrame = null, f
     if (!reduced) bodyU.uTime.value = t;
     haloU.uColor.value.set(col[3], col[4], col[5]);
     haloU.uOpacity.value = Math.min(0.6, 0.14 + Math.max(0, (col[6] - 1) * 1.4 + (col[8] - 1) * 0.35));
-    shadowU.uColor.value.set(col[3] * 0.35, col[4] * 0.35, col[5] * 0.35);
+    { const sh = SHELL.shadow; shadowU.uColor.value.set(sh[0] + (col[3] - sh[0]) * 0.35, sh[1] + (col[4] - sh[1]) * 0.35, sh[2] + (col[5] - sh[2]) * 0.35); }
     eyeU.uShape.value.set(eye[0], eye[1], eye[2]);
     eyeU.uRight.value = eye[3];
     eyeU.uLook.value.set(eye[4], eye[5]);

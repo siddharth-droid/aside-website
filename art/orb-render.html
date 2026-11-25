@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Orb render</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } canvas { display: block; width: 100vw; height: 100vh; }</style>
+</head>
+<body>
+<!-- Renders the real Aside orb on a transparent ground for compositing into illustrations.
+     ?mood=idle|happy|curious|thinking|screenshot&look=paper|ink&size=0.6&gx=0&gy=0 (gaze target, -1..1) -->
+<canvas id="c"></canvas>
+<script type="module">
+import { createOrb3D } from "../orb3d.js";
+const q = new URLSearchParams(location.search);
+const size = +(q.get("size") || 0.6);
+const orb = createOrb3D(document.getElementById("c"), {
+  look: q.get("look") || "paper",
+  reduced: true,
+  target: () => ({ key: "r", x: innerWidth / 2, y: innerHeight / 2, size: Math.min(innerWidth, innerHeight) * size }),
+});
+orb.setMood(q.get("mood") || "idle");
+const gx = +(q.get("gx") || 0), gy = +(q.get("gy") || 0);
+if (gx || gy) orb.holdGaze({ x: innerWidth / 2 + gx * 400, y: innerHeight / 2 - gy * 400 });
+setTimeout(() => (document.body.dataset.ready = "1"), 600);
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 // Aside website. Every answer on this page is prewritten for the demo.
 import { createOrb3D, hasWebGL2 } from "./orb3d.js";
+import { person } from "./cast.js";
 
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const $ = (s, el = document) => el.querySelector(s);
@@ -9,16 +10,25 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 60
 /* =================== The orb: one orb, moving between slots =================== */
 
 let out = false;
-const slotEls = { hero: $("#slotHero"), moods: $("#slotMoods"), close: $("#slotClose") };
-
+const slotEls = { desk: $("#slotHero"), close: $("#slotClose") };
+// It lives at the right edge of the page, the way it lives at the right edge of Windows. It steps into
+// the demo desktop while that plays, and rises at the end of the page.
 function target() {
   const vw = innerWidth, vh = innerHeight;
-  for (const key of ["hero", "moods", "close"]) {
-    const r = slotEls[key].getBoundingClientRect();
-    if (!r.width) continue;
-    const cy = r.top + r.height / 2;
-    const inZone = key === "hero" ? cy > vh * 0.08 && cy < vh * 0.95 : cy > vh * 0.18 && cy < vh * 0.82;
-    if (inZone) return { key, x: r.left + r.width / 2, y: cy, size: r.width };
+  const s = slotEls.desk.getBoundingClientRect();
+  const sy = s.top + s.height / 2;
+  if (s.width && sy > vh * 0.12 && sy < vh * 0.88) return { key: "desk", x: s.left + s.width / 2, y: sy, size: s.width };
+
+  // The finale: the orb rises from the bottom of the page like a sun.
+  const c = slotEls.close.getBoundingClientRect();
+  if (c.width && c.top < vh * 0.85 && c.bottom > vh * 0.3) {
+    // Sized so its top clears the download button and its eyes stay above the fold.
+    if (vw <= 760) { // on a phone the footer sits under it, so it rises whole
+      const size = Math.min(c.width * 0.8, c.height - 24);
+      return { key: "close", x: c.left + c.width / 2, y: c.top + c.height / 2, size };
+    }
+    const size = Math.max(160, Math.min(c.width, vh * 0.62, (c.height - 24) / 0.62));
+    return { key: "close", x: c.left + c.width / 2, y: c.bottom - size * 0.12, size };
   }
   const size = vw < 920 ? 48 : 64;
   return { key: out ? "edge-out" : "edge", x: vw - (out ? 24 + size / 2 : 0), y: vh / 2, size, bob: out, docked: !out };
@@ -32,22 +42,21 @@ if (hasWebGL2()) {
   const lerp = (x) => Math.round(Math.min(1, Math.max(0, x)) * 255);
   const onFrame = (p, col, visible) => {
     // The orb is the page's light source: a soft pool of its own light follows it.
-    const reach = Math.max(520, p.size * 5.5);
+    const reach = Math.max(360, Math.min(p.size * 3.2, 2000));
     light.style.transform = `translate(${p.x - reach / 2}px, ${p.y - reach / 2}px)`;
     light.style.width = light.style.height = reach + "px";
     light.style.setProperty("--light", `${lerp(col[3])}, ${lerp(col[4])}, ${lerp(col[5])}`);
     light.style.opacity = visible ? Math.min(1, 0.55 + (col[6] - 1) * 0.6 + (col[8] - 1) * 0.3) : 0;
   };
   // At the page edge the orb looks at what the section is showing, not at a cursor that may be on the scrollbar.
+  // The hero and the finale have no focus: there, its eyes follow your cursor.
   const FOCUS = {
-    top: () => $(".dwin.is-active"),
-    why: () => $(".why__big"),
-    race: () => $("#raceGrid"),
+    work: () => $(".dwin.is-active"),
+    why: () => $("#raceGrid"),
     try: () => (current && current.el) || $("#tryWin"),
-    how: () => $("#stage"),
-    capture: () => $("#app"),
-    memory: () => $(".settings"),
-    privacy: () => $(".wiring"),
+    show: () => $("#app"),
+    more: () => $(".bento"),
+    privacy: () => $(".receipt"),
     faq: () => $(".qa"),
   };
   const focus = () => {
@@ -57,17 +66,17 @@ if (hasWebGL2()) {
     const r = el.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: Math.min(Math.max(r.top + r.height / 2, 80), innerHeight - 80) };
   };
-  try { gl = createOrb3D($("#orbCanvas"), { target, reduced, onFrame, focus }); } catch (e) { console.warn("3D orb unavailable, using the CSS orb", e); gl = null; }
+  try { gl = createOrb3D($("#orbCanvas"), { target, reduced, onFrame, focus, look: "paper" }); } catch (e) { console.warn("3D orb unavailable, using the CSS orb", e); gl = null; }
 }
+const cloneOrb = (into) => { const c = cssOrb.cloneNode(true); c.removeAttribute("id"); into.append(c); return c; };
 if (!gl) {
   document.documentElement.classList.add("no-gl");
   // Static copies of the CSS orb fill the big slots.
-  for (const key of ["moods", "close"]) {
-    const c = cssOrb.cloneNode(true);
-    c.removeAttribute("id");
-    slotEls[key].append(c);
-  }
+  cloneOrb(slotEls.close);
 }
+// The cast (cast.js): the same three people on the cards, in the race and in the film.
+function drawCast(el, face) { el.innerHTML = person(el.dataset.who, face || el.dataset.face); }
+$$(".cast").forEach((el) => drawCast(el));
 
 const CSS_MOOD = {
   idle: ["#ffd27a", "#f5a742", 1, 0, 1, ""],
@@ -76,22 +85,24 @@ const CSS_MOOD = {
   thinking: ["#f2c98a", "#c9894a", 0.6, 0, 1, "orb--swirl orb--thinking"],
   screenshot: ["#ffb8a8", "#ff7f6e", 1.1, 0, 1, "orb--screenshot"],
 };
+function paintCssOrb(el, m) {
+  const [c, e, b, tilt, r, cls] = CSS_MOOD[m];
+  el.className = "orb " + cls;
+  el.style.setProperty("--core-center", c);
+  el.style.setProperty("--core-edge", e);
+  el.style.setProperty("--strength", Math.min(100, b * 1.35 * 80) + "%");
+  el.style.setProperty("--tilt", tilt + "deg");
+  el.style.setProperty("--r-scale", r);
+}
 const Orb = {
   mood: "idle",
   setMood(m) {
     this.mood = m;
     if (gl) return gl.setMood(m);
-    for (const el of [cssOrb, ...$$(".moods__slot .orb, .finale__slot .orb")]) {
-      const [c, e, b, tilt, r, cls] = CSS_MOOD[m];
-      el.className = "orb " + cls;
-      el.style.setProperty("--core-center", c);
-      el.style.setProperty("--core-edge", e);
-      el.style.setProperty("--strength", Math.min(100, b * 1.35 * 80) + "%");
-      el.style.setProperty("--tilt", tilt + "deg");
-      el.style.setProperty("--r-scale", r);
-    }
+    for (const el of [cssOrb, ...$$(".finale__slot .orb")]) paintCssOrb(el, m);
   },
-  setOut(v) { out = v; dock.classList.toggle("is-out", v); },
+  // It slides out of the edge only where the page leaves room for it beside the content.
+  setOut(v) { out = v && innerWidth >= 1240; dock.classList.toggle("is-out", out); },
   hold(pt) { if (gl) gl.holdGaze(pt); },
   center() {
     if (gl) return gl.center() || { x: innerWidth, y: innerHeight / 2 };
@@ -158,14 +169,21 @@ $$(".hl", desk).forEach((h) => (original[h.dataset.hl] = h.textContent));
 
 let token = { dead: true };
 let paused = false;
-let heroVisible = true;
+let heroVisible = false;
 let heroIdx = 0;
 
 const step = async (tok, ms) => { await sleep(ms); if (tok.dead || !heroVisible) { tok.dead = true; throw tok; } };
 // The hero only drives the orb while the hero is what you're looking at.
 const HeroOrb = {
-  setMood: (m) => { if (section === "top") Orb.setMood(m); },
-  hold: (p) => { if (section === "top") Orb.hold(p); },
+  setMood: (m) => { if (section === "top" || section === "work") Orb.setMood(m); },
+  hold: (p) => { if (section === "work") Orb.hold(p); },
+};
+const phaseEls = $$("#phases li");
+const phase = (n) => {
+  phaseEls.forEach((li) => li.classList.toggle("is-on", +li.dataset.phase === n));
+  // The person on the playing card reacts: stuck before, relieved once the answer is used.
+  const cast = $('.scene-tab[aria-selected="true"] .cast');
+  if (cast && (n === 0 || n === 5)) drawCast(cast, n === 5 ? cast.dataset.done : cast.dataset.face);
 };
 
 function keys(list) {
@@ -191,6 +209,7 @@ function resetScene(name) {
   $$("span", dpanel).forEach((s) => s.classList.remove("is-on"));
   dCopy.firstChild.textContent = "Copy ";
   tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.scene === name)));
+  phase(0);
 }
 function showFinal(name) {
   const sc = SCENES[name];
@@ -204,6 +223,7 @@ function showFinal(name) {
   if (sc.ans[1]) { const bp = document.createElement("p"); bp.className = "b"; bp.textContent = sc.ans[1]; dText.append(bp); }
   dReplace.hidden = !sc.replace;
   dpanel.classList.add("is-open", "has-answer", "has-acts");
+  phase(5);
   HeroOrb.setMood("happy");
 }
 
@@ -224,14 +244,17 @@ async function playScene(name, tok) {
   lookAtSel();
   await step(tok, 1050);
   keys(["Alt", "Mouse 5"]);
+  phase(1);
   await step(tok, 350);
   HeroOrb.setMood("curious");
   dExcerpt.textContent = hl.textContent;
   dpanel.classList.add("is-open");
+  phase(2);
   await step(tok, 1300);
   keys(sc.key);
   const chip = $(`.dpanel__chips [data-a="${sc.act}"]`, dpanel);
   chip.classList.add("is-on");
+  phase(3);
   await step(tok, 450);
   HeroOrb.setMood("thinking");
   dQ.textContent = sc.q;
@@ -240,6 +263,7 @@ async function playScene(name, tok) {
   await step(tok, 1100);
   HeroOrb.setMood("happy");
   { const r = dText.getBoundingClientRect(); HeroOrb.hold({ x: r.left + r.width * 0.4, y: r.top + 20 }); }
+  phase(4);
   const dur = renderInto(dText, sc.ans);
   await step(tok, dur);
   dReplace.hidden = !sc.replace;
@@ -248,6 +272,7 @@ async function playScene(name, tok) {
   if (sc.replace) {
     keys(["Ctrl Enter"]);
     dReplace.classList.add("is-on");
+    phase(5);
     await step(tok, 450);
     hl.textContent = sc.ans.filter(Boolean).join(" ");
     hl.classList.remove("is-sel");
@@ -257,6 +282,7 @@ async function playScene(name, tok) {
   } else {
     keys(["Ctrl Shift C"]);
     dCopy.classList.add("is-on");
+    phase(5);
     dCopy.firstChild.textContent = "Copied ";
     await step(tok, 1000);
     keys(["Esc"]);
@@ -264,6 +290,7 @@ async function playScene(name, tok) {
     dpanel.classList.remove("is-open");
     hl.classList.remove("is-sel");
   }
+  phase(6);
   HeroOrb.setMood("idle");
   await step(tok, 1400);
   HeroOrb.hold(null);
@@ -310,7 +337,7 @@ new IntersectionObserver(([en]) => {
 }, { threshold: 0.25 }).observe(desk);
 
 if (reduced) { showFinal("mail"); paused = true; playBtn.classList.add("is-paused"); }
-else { cursorTo(deskScreen.clientWidth * 0.7, deskScreen.clientHeight * 0.8, 0); runHero(0); }
+else cursorTo(deskScreen.clientWidth * 0.7, deskScreen.clientHeight * 0.8, 0); // it starts once the desk is in view
 
 /* =================== Race: a chat tab vs Aside =================== */
 
@@ -553,46 +580,55 @@ addEventListener("keydown", (e) => {
 
 /* =================== Moods =================== */
 
+// Pointing at a mood hands it to the real orb at the edge of the page.
 const moodBtns = $$(".mood");
-const moodCaption = $("#moodCaption");
-const MOOD_ORDER = ["idle", "thinking", "curious", "happy", "screenshot"];
-let moodIdx = 0;
-let moodPinnedUntil = 0;
 function showMood(m) {
-  moodIdx = MOOD_ORDER.indexOf(m);
   moodBtns.forEach((b) => b.classList.toggle("is-on", b.dataset.mood === m));
-  moodCaption.textContent = $(`.mood[data-mood="${m}"] b`).textContent;
-  if (section === "moods") Orb.setMood(m);
+  Orb.setMood(m || "idle");
 }
 moodBtns.forEach((b) => {
-  const pick = () => { moodPinnedUntil = performance.now() + 7000; showMood(b.dataset.mood); };
-  b.addEventListener("click", pick);
-  b.addEventListener("pointerenter", pick);
-  b.addEventListener("focus", pick);
+  b.addEventListener("pointerenter", () => showMood(b.dataset.mood));
+  b.addEventListener("focus", () => showMood(b.dataset.mood));
+  b.addEventListener("click", () => showMood(b.dataset.mood));
 });
-setInterval(() => {
-  if (section !== "moods" || reduced || performance.now() < moodPinnedUntil) return;
-  showMood(MOOD_ORDER[(moodIdx + 1) % MOOD_ORDER.length]);
-}, 2800);
-showMood("idle");
+$("#moodList").addEventListener("pointerleave", () => showMood(null));
 
-/* =================== How it works: six steps =================== */
+/* =================== Hero: the orb is pleased when you reach for the download =================== */
 
-const stage = $("#stage");
-const steps = $$(".step");
-const STEP_ORB = { 1: ["idle", true], 2: ["curious", true], 3: ["idle", true], 4: ["thinking", true], 5: ["happy", true], 6: ["idle", false] };
-let stepNow = 0;
-const stepObs = new IntersectionObserver((entries) => {
-  entries.forEach((en) => {
-    if (!en.isIntersecting) return;
-    stepNow = +en.target.dataset.step;
-    stage.dataset.step = stepNow;
-    steps.forEach((s) => s.classList.toggle("is-on", +s.dataset.step === stepNow));
-    if (section === "how") applyStepOrb();
-  });
-}, { rootMargin: "-45% 0px -45% 0px" });
-steps.forEach((s) => stepObs.observe(s));
-function applyStepOrb() { const [m, o] = STEP_ORB[stepNow] || ["idle", false]; Orb.setMood(m); Orb.setOut(o); }
+// The headline's pill is the product in miniature: a tiny orb that goes through one question's moods.
+const pillOrb = cloneOrb($("#pillOrb"));
+paintCssOrb(pillOrb, "idle");
+(async () => {
+  if (reduced) return;
+  const beats = [["idle", 2200], ["curious", 1200], ["thinking", 1400], ["happy", 2000]];
+  for (let i = 0; ; i = (i + 1) % beats.length) {
+    paintCssOrb(pillOrb, beats[i][0]);
+    await new Promise((r) => setTimeout(r, beats[i][1]));
+  }
+})();
+
+const heroDl = $("#heroDl");
+heroDl.addEventListener("pointerenter", () => { if (section === "top") Orb.setMood("happy"); });
+heroDl.addEventListener("pointerleave", () => { if (section === "top") Orb.setMood("idle"); });
+
+// The finale: the orb has risen and simply enjoys it, happy, its eyes following your cursor.
+// Its own observer, so a jump straight to the end (End key, a footer link) still lands on a happy orb.
+const finaleHappy = () => requestAnimationFrame(() => { Orb.hold(null); Orb.setMood("happy"); });
+new IntersectionObserver(([en]) => { if (en.isIntersecting) finaleHappy(); }, { threshold: 0.33 }).observe($("#download"));
+
+// Each footer link gets the face that matches it: curious at the source, eyes closed for privacy
+// (it doesn't look), thinking for questions. Leaving puts it back to happy, following your cursor.
+$$(".foot__links a[data-mood]").forEach((a) => {
+  const look = () => {
+    const r = a.getBoundingClientRect();
+    Orb.hold({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+    Orb.setMood(a.dataset.mood);
+  };
+  a.addEventListener("pointerenter", look);
+  a.addEventListener("focus", look);
+  a.addEventListener("pointerleave", finaleHappy);
+  a.addEventListener("blur", finaleHappy);
+});
 
 /* =================== Capture and show me =================== */
 
@@ -723,11 +759,9 @@ const secObs = new IntersectionObserver((entries) => {
     if (prev === section) return;
     if (section !== "top") Orb.hold(null);
     switch (section) {
-      case "top": Orb.setOut(false); Orb.setMood("idle"); break; // the hero timeline drives it from here
+      case "top": case "work": Orb.setOut(false); Orb.setMood("idle"); break; // the demo timeline drives it from here
       case "try": Orb.setOut(note.dataset.state !== "empty"); Orb.setMood("idle"); break;
-      case "moods": Orb.setMood(MOOD_ORDER[moodIdx]); break;
-      case "how": applyStepOrb(); break;
-      case "capture":
+      case "show":
         if (!showStarted) { showStarted = true; startShow(); }
         else { Orb.setOut(true); Orb.setMood(showDone ? "happy" : "curious"); }
         break;
