@@ -1,5 +1,5 @@
 // Aside website. Every answer on this page is prewritten for the demo.
-import { createOrb3D, hasWebGL2 } from "./orb3d.js";
+import { createOrb3D, hasWebGL2 } from "./orb3d.js?v=26";
 import { person } from "./cast.js";
 
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -10,14 +10,20 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 60
 /* =================== The orb: one orb, moving between slots =================== */
 
 let out = false;
-const slotEls = { desk: $("#slotHero"), close: $("#slotClose") };
+const slotEls = { desk: $("#slotHero"), trySlot: $("#slotTry"), close: $("#slotClose") };
 // It lives at the right edge of the page, the way it lives at the right edge of Windows. It steps into
-// the demo desktop while that plays, and rises at the end of the page.
+// the demo desktop, sits beside the Real moments panel, and rises at the end of the page.
 function target() {
   const vw = innerWidth, vh = innerHeight;
   const s = slotEls.desk.getBoundingClientRect();
   const sy = s.top + s.height / 2;
   if (s.width && sy > vh * 0.12 && sy < vh * 0.88) return { key: "desk", x: s.left + s.width / 2, y: sy, size: s.width };
+
+  const ts = slotEls.trySlot && slotEls.trySlot.getBoundingClientRect();
+  if (ts && ts.width) {
+    const ty = ts.top + ts.height / 2;
+    if (ty > vh * 0.08 && ty < vh * 0.92) return { key: "try", x: ts.left + ts.width / 2, y: ty, size: ts.width, bob: true };
+  }
 
   // The finale: the orb rises from the bottom of the page like a sun.
   const c = slotEls.close.getBoundingClientRect();
@@ -73,6 +79,7 @@ if (!gl) {
   document.documentElement.classList.add("no-gl");
   // Static copies of the CSS orb fill the big slots.
   cloneOrb(slotEls.close);
+  if (slotEls.trySlot) cloneOrb(slotEls.trySlot);
 }
 // The cast (cast.js): the same three people on the cards, in the race and in the film.
 function drawCast(el, face) { el.innerHTML = person(el.dataset.who, face || el.dataset.face); }
@@ -81,7 +88,7 @@ $$(".cast").forEach((el) => drawCast(el));
 const CSS_MOOD = {
   idle: ["#ffd27a", "#f5a742", 1, 0, 1, ""],
   happy: ["#fff1c9", "#ff9e6b", 1.25, 0, 1, "orb--happy"],
-  curious: ["#c4f5ec", "#4fc4bb", 1, -8, 1.25, ""],
+  curious: ["#c4f5ec", "#4fc4bb", 1, 0, 1.25, ""],
   thinking: ["#f2c98a", "#c9894a", 0.6, 0, 1, "orb--swirl orb--thinking"],
   screenshot: ["#ffb8a8", "#ff7f6e", 1.1, 0, 1, "orb--screenshot"],
 };
@@ -151,15 +158,15 @@ const controls = $(".desk__controls");
 
 const SCENES = {
   mail: {
-    act: "rewrite", key: ["Ctrl R"], q: "Rewrite the selection", replace: true,
+    act: "infer", key: ["Enter"], q: "", replace: true,
     ans: ["The copy deadline was Monday, and we're still waiting on the final pricing page.", "Could we have it by Wednesday?"],
   },
   code: {
-    act: "explain", key: ["Enter"], q: "Explain the selection", replace: false,
+    act: "infer", key: ["Enter"], q: "", replace: false,
     ans: ["items is undefined the first time the list draws, so there's nothing to call map on.", "loadOrders hasn't finished yet on the first render. Start from an empty list: useState([])."],
   },
   web: {
-    act: "translate", key: ["Ctrl T"], q: "Translate the selection", replace: false,
+    act: "infer", key: ["Enter"], q: "", replace: false,
     ans: ["Your application was submitted. Please upload a copy of your ID within 14 days.", ""],
   },
 };
@@ -376,76 +383,123 @@ $("#raceAgain").addEventListener("click", race);
 /* =================== Try it, by job =================== */
 
 const JOBS = {
-  writing: {
-    title: "Re: Thursday's launch review · Draft",
-    html: `<p>Hi Marta,</p>
-<p>Thanks for sending the deck over. <span class="s" data-s="w1">Per my last email, the copy deadline was Monday and we still don't have the final pricing page.</span> I know your team has been stretched, so let's find a way through this.</p>
-<p><span class="s" data-s="w2">Legal flagged that the trial terms need to be GDPR-compliant before anything goes live.</span> Can you check with Jonas whether that's already covered? <span class="s" data-s="w3">We could also push the launch to the 14th if that lowers the risk.</span></p>
-<p>Best,<br>Sam</p>`,
+  slack: {
+    title: "#product-launch · Slack",
+    first: "s1",
+    html: `<div class="sl-msg"><div class="sl-meta"><b>Devon</b> <span>10:14 AM</span></div><p>Hey, did you ever send over the updated launch deck?</p></div>
+<div class="sl-msg"><div class="sl-meta"><b>Priya</b> <span>10:16 AM</span></div><p><span class="s" data-s="s2">I can check GDPR terms by Thu 2pm. Sam is holding the blog post until Marta confirms tier names.</span></p></div>
+<div class="sl-compose"><span class="sl-compose__tag">Message #product-launch</span><p><span class="s" data-s="s1">I already sent the updated deck twice, please actually check the thread before pinging me again.</span></p></div>`,
     ans: {
-      w1: {
-        explain: ["It's a reminder with an edge.", "“Per my last email” usually reads as passive-aggressive. If you want to keep this warm, state the missed date and ask for a new one."],
-        translate: ["Die Frist für die Texte war Montag, und uns fehlt noch die finale Preisseite.", "Into German, because you write to the Berlin team in German."],
-        rewrite: ["The copy deadline was Monday, and we're still waiting on the final pricing page.", "Could we have it by Wednesday?"],
+      s1: {
+        kind: "replace",
+        q: "Soften before sending",
+        lines: ["Resharing the updated deck from earlier in the thread so it's right here.", "Let me know if you need anything else before review."],
       },
-      w2: {
-        explain: ["Legal wants the trial terms to follow EU data protection rules before launch.", "In practice: say what the trial collects, why, how long you keep it, and how people can ask for it to be deleted."],
-        rewrite: ["Legal needs the trial terms to meet GDPR before we go live.", ""],
-      },
-      w3: {
-        explain: ["You're offering a fallback.", "A later launch date in exchange for more time to finish the pricing page and the legal review."],
-        rewrite: ["If it lowers the risk, we could move the launch to the 14th.", ""],
+      s2: {
+        kind: "explain",
+        q: "Action items",
+        lines: ["Two blockers left before the blog post goes live.", "Priya reviews GDPR terms by Thu 2pm, and Marta needs to confirm tier names for Sam."],
       },
     },
   },
-  coding: {
-    title: "OrderList.tsx · shop-web",
-    html: `<p class="muted">Console</p>
-<code class="codeblock"><span class="s" data-s="c1">Uncaught TypeError: Cannot read properties of undefined (reading 'map')</span>
-    at OrderList (OrderList.tsx:4:24)</code>
-<code class="codeblock"><span class="s" data-s="c2">const total = items.reduce((a, b) =&gt; a + b.price, 0);</span></code>`,
+  excel: {
+    title: "Q4-pricing.xlsx · Excel",
+    first: "e1",
+    html: `<div class="xl-bar"><span>fx</span><span class="s" data-s="e1">=VLOOKUP(A2, Prices!B:C, 2, FALSE)</span></div>
+<table class="xl-grid">
+  <thead><tr><th></th><th>A · SKU</th><th>B · Plan</th><th>C · Qty</th><th>D · Price</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>PRO-M</td><td>Pro Monthly</td><td>12</td><td>$29.00</td></tr>
+    <tr class="xl-active"><td>2</td><td>ENT-Y</td><td>Enterprise</td><td>40</td><td id="xlCell" class="xl-err">#N/A</td></tr>
+    <tr><td>3</td><td>ADD-S</td><td>Extra Seat</td><td>8</td><td><span class="s" data-s="e2">=IF(C3&gt;10, C3*8, C3*10)</span></td></tr>
+  </tbody>
+</table>`,
     ans: {
-      c1: { explain: ["items is undefined the first time the list draws, so there's nothing to call map on.", "loadOrders hasn't finished yet on the first render. Start from an empty list: useState([])."] },
-      c2: {
-        explain: ["It adds up the price of every item, starting from 0.", "a is the running total and b is the current item."],
-        rewrite: ["const total = items.reduce((sum, item) => sum + item.price, 0);", "Same logic, with names that say what they hold."],
+      e1: {
+        kind: "replace",
+        q: "Fix broken formula",
+        lines: ["=XLOOKUP(A2, Prices!C:C, Prices!B:B, \"Not found\")", "VLOOKUP can't look left. XLOOKUP matches A2 in column C and returns column B cleanly."],
+        replaceText: "=XLOOKUP(A2, Prices!C:C, Prices!B:B, \"Not found\")",
+        afterReplace: () => {
+          const cell = $("#xlCell");
+          if (cell) { cell.textContent = "$49.00"; cell.classList.remove("xl-err"); cell.classList.add("xl-ok"); }
+        },
+      },
+      e2: {
+        kind: "explain",
+        q: "Explain formula",
+        lines: ["Charges $8 per seat over 10 seats, otherwise $10.", "For 8 seats in C3, this evaluates to $80."],
       },
     },
   },
-  studying: {
-    title: "Lecture 7 · Cellular respiration.pdf",
-    html: `<h5>7.3 The electron transport chain</h5>
-<p><span class="s" data-s="b1">Oxidative phosphorylation couples the electron transport chain to ATP synthesis via a proton gradient across the inner mitochondrial membrane.</span></p>
-<p><span class="s" data-s="b2">Without oxygen as the final electron acceptor, the chain stalls and ATP output drops sharply.</span> Cells then rely on glycolysis alone.</p>`,
+  lease: {
+    title: "Apartment-Lease-2026.pdf",
+    first: "l1",
+    html: `<div class="pdf-sheet">
+<p class="pdf-sec">SECTION 14 · RENEWAL AND NOTICE</p>
+<p><span class="s" data-s="l1">Unless Lessee delivers written notice of non-renewal by certified mail at least sixty (60) calendar days prior to the Expiration Date, this Agreement shall automatically renew for a successive twelve (12) month term at a rental rate increased by up to 8%.</span></p>
+<p><span class="s" data-s="l2">Lessee waives any claim to interest accrued on the Security Deposit except where expressly mandated by municipal statute.</span></p>
+</div>`,
+    ans: {
+      l1: {
+        kind: "explain",
+        q: "Spot the catch",
+        lines: ["Catch: your lease auto-renews for a full year unless you send certified mail 60 days early.", "They can also raise rent up to 8% automatically if you miss that window."],
+      },
+      l2: {
+        kind: "explain",
+        q: "Plain English",
+        lines: ["You won't earn interest on your security deposit unless local city law forces them to pay it.", ""],
+      },
+    },
+  },
+  bill: {
+    title: "AWS Cost Explorer · October",
+    first: "b1",
+    html: `<p class="muted">You can't select a chart. Drag the orb over it (click below to recapture).</p>
+<div class="bill-card s" data-s="b1" data-capture="true">
+  <i class="bc tl"></i><i class="bc tr"></i><i class="bc bl"></i><i class="bc br"></i>
+  <div class="bill-head"><span>Monthly Spend by Service</span><b>$208.40</b></div>
+  <div class="bill-row"><span>VPC NAT Gateway</span><div class="bill-track"><i style="width:68%;background:#d43a0a"></i></div><b>$142.10</b></div>
+  <div class="bill-row"><span>EC2 Compute</span><div class="bill-track"><i style="width:18%"></i></div><b>$36.80</b></div>
+  <div class="bill-row"><span>RDS Postgres</span><div class="bill-track"><i style="width:10%"></i></div><b>$21.20</b></div>
+  <div class="bill-row"><span>S3 + CloudFront</span><div class="bill-track"><i style="width:4%"></i></div><b>$8.30</b></div>
+</div>`,
     ans: {
       b1: {
-        explain: ["The cell uses a flow of protons to power the machine that makes ATP.", "Electrons moving down the chain pump protons across the inner membrane. As the protons flow back through ATP synthase, it turns and makes ATP, like water through a mill."],
-        rewrite: ["The electron transport chain builds up a proton gradient, and that gradient drives ATP synthase to make ATP.", ""],
+        kind: "capture",
+        q: "Captured region",
+        lines: ["NAT Gateway is 68% of your bill ($142.10). Everything else combined is $66.", "Adding a free S3/DynamoDB VPC Gateway Endpoint usually cuts most NAT data processing charges."],
       },
-      b2: { explain: ["Oxygen is what clears the chain at the end.", "With nothing to take the electrons, the chain backs up, protons stop being pumped, and the cell falls back on far less efficient ways to make ATP."] },
     },
   },
-  browsing: {
-    title: "Bürgerportal · Antrag",
-    html: `<h5 lang="de">Ihr Antrag</h5>
-<p lang="de"><span class="s" data-s="g1">Ihr Antrag wurde eingereicht. Bitte laden Sie innerhalb von 14 Tagen eine Kopie Ihres Ausweises hoch.</span></p>
-<p lang="de"><span class="s" data-s="g2">Die Bearbeitung dauert in der Regel drei bis fünf Werktage.</span></p>`,
+  terminal: {
+    title: "Windows PowerShell · shop-web",
+    first: "t1",
+    html: `<div class="ps-term">
+<p class="ps-cmd">PS D:\\shop-web&gt; git pull origin main</p>
+<p class="ps-err"><span class="s" data-s="t1">fatal: refusing to merge unrelated histories</span></p>
+<p class="ps-cmd" style="margin-top:16px">PS D:\\shop-web&gt; pnpm dev</p>
+<p class="ps-err"><span class="s" data-s="t2">pnpm.ps1 cannot be loaded because running scripts is disabled on this system. (PSSecurityException)</span></p>
+</div>`,
     ans: {
-      g1: {
-        translate: ["Your application was submitted. Please upload a copy of your ID within 14 days.", ""],
-        explain: ["They have your application, but they need a copy of your ID.", "Upload it within 14 days, or the application may not be processed."],
+      t1: {
+        kind: "explain",
+        q: "Fix Git error",
+        lines: ["Your local repo and remote started from separate initial commits.", "Run: git pull origin main --allow-unrelated-histories"],
       },
-      g2: {
-        translate: ["Processing usually takes three to five working days.", ""],
-        explain: ["Expect an answer within about a week.", "Working days exclude weekends and public holidays."],
+      t2: {
+        kind: "explain",
+        q: "Fix PowerShell policy (remembered: Windows)",
+        lines: ["PowerShell is blocking local script shims for your user.", "Run once: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"],
       },
     },
   },
 };
-const LABEL = { explain: "Explain the selection", translate: "Translate the selection", rewrite: "Rewrite the selection" };
 
 const tryDoc = $("#tryDoc");
 const note = $("#note");
+const noteCtxLabel = $("#noteCtxLabel");
 const noteExcerpt = $("#noteExcerpt");
 const noteQ = $("#noteQ");
 const noteStatus = $("#noteStatus");
@@ -454,35 +508,59 @@ const noteActs = $("#noteActs");
 const copyBtn = $("#noteCopy");
 const replaceBtn = $("#noteReplace");
 const chips = $$("#noteChips .chip");
-let job = "writing";
+let job = "slack";
 let current = null;
 let lastAnswer = "";
+let lastReplace = "";
 let run = 0;
 
-function loadJob(name) {
+function showInstant(el) {
+  const entry = JOBS[job].ans[el.dataset.s];
+  if (!entry) return;
+  $$(".s.is-sel", tryDoc).forEach((s) => s.classList.remove("is-sel"));
+  el.classList.add("is-sel");
+  const isCapture = el.dataset.capture === "true";
+  current = { el, sid: el.dataset.s, isCapture };
+  noteCtxLabel.textContent = isCapture ? "Your capture" : "Your selection";
+  noteExcerpt.textContent = isCapture ? "Monthly Spend by Service ($208.40 chart)" : el.textContent.trim();
+  noteQ.textContent = entry.q;
+  noteStatus.textContent = "";
+  noteText.textContent = "";
+  const hp = document.createElement("p"); hp.className = "h"; hp.textContent = entry.lines[0]; noteText.append(hp);
+  if (entry.lines[1]) { const bp = document.createElement("p"); bp.className = "b"; bp.textContent = entry.lines[1]; noteText.append(bp); }
+  lastAnswer = entry.lines.filter(Boolean).join(" ");
+  lastReplace = entry.replaceText || lastAnswer;
+  replaceBtn.hidden = entry.kind !== "replace";
+  noteActs.hidden = false;
+  note.dataset.state = "answer";
+  if (section === "try") Orb.setMood(isCapture ? "screenshot" : "happy");
+}
+
+function loadJob(name, animateFirst = false) {
   job = name;
   run++;
   $$(".job").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.job === name)));
   $("#tryTitle").textContent = JOBS[name].title;
   tryDoc.innerHTML = JOBS[name].html;
-  $$(".s", tryDoc).forEach((s) => { s.tabIndex = 0; s.setAttribute("role", "button"); s.setAttribute("aria-label", "Ask Aside about: " + s.textContent); });
-  current = null;
-  note.dataset.state = "empty";
-  if (section === "try") { Orb.setOut(false); Orb.setMood("idle"); }
+  $$(".s", tryDoc).forEach((s) => { s.tabIndex = 0; s.setAttribute("role", "button"); s.setAttribute("aria-label", "Ask Aside about: " + s.textContent.trim().slice(0, 80)); });
+  const firstEl = $(`.s[data-s="${JOBS[name].first}"]`, tryDoc) || $(".s", tryDoc);
+  if (firstEl) {
+    if (animateFirst) selectAndAsk(firstEl);
+    else showInstant(firstEl);
+  }
 }
-$$(".job").forEach((b) => b.addEventListener("click", () => loadJob(b.dataset.job)));
+$$(".job").forEach((b) => b.addEventListener("click", () => loadJob(b.dataset.job, true)));
 
-function selectSentence(el) {
+function selectAndAsk(el) {
   run++;
   $$(".s.is-sel", tryDoc).forEach((s) => s.classList.remove("is-sel"));
   el.classList.add("is-sel");
-  current = { el, sid: el.dataset.s };
-  noteExcerpt.textContent = el.textContent;
-  const avail = JOBS[job].ans[current.sid];
-  chips.forEach((c) => (c.hidden = !avail[c.dataset.act]));
-  note.dataset.state = "chips";
-  Orb.setOut(true);
-  Orb.setMood("curious");
+  const isCapture = el.dataset.capture === "true";
+  current = { el, sid: el.dataset.s, isCapture };
+  noteCtxLabel.textContent = isCapture ? "Your capture" : "Your selection";
+  noteExcerpt.textContent = isCapture ? "Monthly Spend by Service ($208.40 chart)" : el.textContent.trim();
+  Orb.setMood(isCapture ? "screenshot" : "curious");
+  ask();
 }
 function selectUnknown(text) {
   run++;
@@ -492,30 +570,30 @@ function selectUnknown(text) {
   noteQ.textContent = "“" + (text.length > 60 ? text.slice(0, 57) + "…" : text) + "”";
   noteActs.hidden = true;
   noteText.textContent = "";
-  const h = document.createElement("p"); h.className = "h"; h.textContent = "This page only has answers for the sentences that light up on hover."; noteText.append(h);
-  const b = document.createElement("p"); b.className = "b"; b.textContent = "In Aside, the selection can be anything, in any app."; noteText.append(b);
-  Orb.setOut(true);
+  const h = document.createElement("p"); h.className = "h"; h.textContent = "This page only has answers for the highlighted items."; noteText.append(h);
+  const b = document.createElement("p"); b.className = "b"; b.textContent = "In Aside, you can select any text or drag the orb over anything on screen."; noteText.append(b);
   Orb.setMood("curious");
 }
-async function ask(act) {
+async function ask() {
   if (!current) return;
-  const ans = JOBS[job].ans[current.sid][act];
-  if (!ans) return;
+  const entry = JOBS[job].ans[current.sid];
+  if (!entry) return;
   const id = ++run;
   note.dataset.state = "thinking";
-  noteQ.textContent = LABEL[act];
+  noteQ.textContent = entry.q;
   noteText.textContent = "";
   noteActs.hidden = true;
   noteStatus.textContent = "Thinking";
-  Orb.setMood("thinking");
-  await sleep(800);
+  Orb.setMood(current.isCapture ? "screenshot" : "thinking");
+  await sleep(600);
   if (id !== run) return;
   noteStatus.textContent = "";
   note.dataset.state = "answer";
   Orb.setMood("happy");
-  const dur = renderInto(noteText, ans);
-  lastAnswer = ans.filter(Boolean).join(" ");
-  replaceBtn.hidden = act === "explain";
+  const dur = renderInto(noteText, entry.lines);
+  lastAnswer = entry.lines.filter(Boolean).join(" ");
+  lastReplace = entry.replaceText || lastAnswer;
+  replaceBtn.hidden = entry.kind !== "replace";
   await sleep(dur);
   if (id !== run) return;
   noteActs.hidden = false;
@@ -524,12 +602,14 @@ async function ask(act) {
 }
 async function replaceSel() {
   if (!current || replaceBtn.hidden) return;
+  const entry = JOBS[job].ans[current.sid];
   run++;
   const el = current.el;
-  el.textContent = lastAnswer;
+  el.textContent = lastReplace;
   el.classList.remove("is-sel", "s");
   ["role", "tabindex", "aria-label"].forEach((a) => el.removeAttribute(a));
   el.classList.add("is-new");
+  if (entry && entry.afterReplace) entry.afterReplace();
   current = null;
   dismiss("Replaced in place.");
 }
@@ -543,55 +623,107 @@ async function dismiss(msg) {
     noteQ.textContent = msg;
     noteText.textContent = "";
     const p = document.createElement("p"); p.className = "b";
-    p.textContent = $$(".s", tryDoc).length ? "Select another sentence, or try another job." : "That's all of this one. Try another job.";
+    p.textContent = $$(".s", tryDoc).length ? "Click another item, or switch apps above." : "Done with this one. Try another app above.";
     noteText.append(p);
   } else note.dataset.state = "empty";
-  Orb.setMood("idle");
-  await sleep(300);
-  Orb.setOut(false);
+  Orb.setMood("happy");
 }
 tryDoc.addEventListener("mouseup", () => {
   const sel = getSelection();
   const text = sel.toString().trim();
   if (!text) return;
   const s = sel.anchorNode && sel.anchorNode.parentElement && sel.anchorNode.parentElement.closest(".s");
-  if (s) selectSentence(s); else selectUnknown(text);
+  if (s) selectAndAsk(s); else selectUnknown(text);
 });
-tryDoc.addEventListener("click", (e) => { const s = e.target.closest(".s"); if (s && getSelection().isCollapsed) selectSentence(s); });
+tryDoc.addEventListener("click", (e) => { const s = e.target.closest(".s"); if (s && getSelection().isCollapsed) selectAndAsk(s); });
 tryDoc.addEventListener("keydown", (e) => {
   const s = e.target.closest && e.target.closest(".s");
   if (!s || (e.key !== "Enter" && e.key !== " ")) return;
   e.preventDefault();
-  if (current && current.el === s && note.dataset.state === "chips") ask($$("#noteChips .chip:not([hidden])")[0].dataset.act);
-  else selectSentence(s);
+  selectAndAsk(s);
 });
-chips.forEach((b) => b.addEventListener("click", () => ask(b.dataset.act)));
+chips.forEach((b) => b.addEventListener("click", () => ask()));
 replaceBtn.addEventListener("click", replaceSel);
 copyBtn.addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(lastAnswer); } catch { /* the label still confirms */ }
+  try { await navigator.clipboard.writeText(lastReplace); } catch { /* the label still confirms */ }
   copyBtn.firstChild.textContent = "Copied ";
   setTimeout(() => (copyBtn.firstChild.textContent = "Copy "), 1500);
 });
 addEventListener("keydown", (e) => {
   if (section !== "try") return;
   if (e.key === "Escape" && note.dataset.state !== "empty") dismiss();
+  else if (e.key === "Enter" && !e.ctrlKey && current && note.dataset.state === "chips") { e.preventDefault(); ask(); }
   else if (e.key === "Enter" && e.ctrlKey && !replaceBtn.hidden && note.dataset.state === "answer") { e.preventDefault(); replaceSel(); }
 });
 
-/* =================== Moods =================== */
+/* =================== Moods: live interactive orbs that watch each other =================== */
 
-// Pointing at a mood hands it to the real orb at the edge of the page.
+const moodList = $("#moodList");
 const moodBtns = $$(".mood");
-function showMood(m) {
+const moodOrbs = moodBtns.map((b) => {
+  const host = $(".mood__orb", b);
+  const orb = cloneOrb(host);
+  paintCssOrb(orb, b.dataset.mood);
+  return { btn: b, orb, mood: b.dataset.mood };
+});
+
+function aimOrb(orb, dx, dy) {
+  const d = Math.hypot(dx, dy) || 1;
+  const k = Math.min(1, d / 160);
+  orb.style.setProperty("--lx", (dx / d) * k * 4.5 + "px");
+  orb.style.setProperty("--ly", (dy / d) * k * 3.5 + "px");
+}
+
+function lookAtPoint(x, y) {
+  moodOrbs.forEach(({ orb, mood }) => {
+    if (mood === "happy" || mood === "screenshot") return;
+    const r = orb.getBoundingClientRect();
+    aimOrb(orb, x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+  });
+}
+
+let hoveredMood = null;
+function showMood(m, btn) {
+  hoveredMood = m;
   moodBtns.forEach((b) => b.classList.toggle("is-on", b.dataset.mood === m));
   Orb.setMood(m || "idle");
+  if (btn) {
+    const r = $(".mood__orb", btn).getBoundingClientRect();
+    lookAtPoint(r.left + r.width / 2, r.top + r.height / 2);
+  }
 }
+
 moodBtns.forEach((b) => {
-  b.addEventListener("pointerenter", () => showMood(b.dataset.mood));
-  b.addEventListener("focus", () => showMood(b.dataset.mood));
-  b.addEventListener("click", () => showMood(b.dataset.mood));
+  b.addEventListener("pointerenter", () => showMood(b.dataset.mood, b));
+  b.addEventListener("focus", () => showMood(b.dataset.mood, b));
+  b.addEventListener("click", () => showMood(b.dataset.mood, b));
 });
-$("#moodList").addEventListener("pointerleave", () => showMood(null));
+moodList.addEventListener("pointermove", (e) => {
+  if (!reduced) lookAtPoint(e.clientX, e.clientY);
+});
+moodList.addEventListener("pointerleave", () => showMood(null));
+
+// When nobody is hovering, the orbs quietly glance at each other.
+if (!reduced) {
+  let stepIdx = 0;
+  const glance = () => {
+    if (hoveredMood) return;
+    const patterns = [
+      { idle: [-4, 0], thinking: [1, -3], curious: [4, 0] },
+      { idle: [4, 0], thinking: [-4, 0], curious: [-4, 0] },
+      { idle: [0, 0], thinking: [4, -1], curious: [4, 0] },
+      { idle: [-3, 1], thinking: [-3, -2], curious: [-3, 1] },
+    ];
+    const p = patterns[stepIdx++ % patterns.length];
+    moodOrbs.forEach(({ orb, mood }) => {
+      const xy = p[mood] || [0, 0];
+      orb.style.setProperty("--lx", xy[0] + "px");
+      orb.style.setProperty("--ly", xy[1] + "px");
+    });
+  };
+  glance();
+  setInterval(glance, 2400);
+}
 
 /* =================== Hero: the orb is pleased when you reach for the download =================== */
 
@@ -613,13 +745,26 @@ heroDl.addEventListener("pointerleave", () => { if (section === "top") Orb.setMo
 
 // The finale: the orb has risen and simply enjoys it, happy, its eyes following your cursor.
 // Its own observer, so a jump straight to the end (End key, a footer link) still lands on a happy orb.
-const finaleHappy = () => requestAnimationFrame(() => { Orb.hold(null); Orb.setMood("happy"); });
-new IntersectionObserver(([en]) => { if (en.isIntersecting) finaleHappy(); }, { threshold: 0.33 }).observe($("#download"));
+let footRaf = 0;
+const finaleHappy = () => {
+  cancelAnimationFrame(footRaf);
+  footRaf = requestAnimationFrame(() => {
+    if ($(".foot__links a[data-mood]:hover") || (document.activeElement && document.activeElement.closest && document.activeElement.closest(".foot__links"))) return;
+    Orb.hold(null);
+    Orb.setMood("happy");
+  });
+};
+const topNav = $(".nav");
+new IntersectionObserver(([en]) => {
+  if (topNav) topNav.classList.toggle("is-hidden", en.isIntersecting);
+  if (en.isIntersecting) finaleHappy();
+}, { threshold: 0.25 }).observe($("#download"));
 
 // Each footer link gets the face that matches it: curious at the source, eyes closed for privacy
 // (it doesn't look), thinking for questions. Leaving puts it back to happy, following your cursor.
 $$(".foot__links a[data-mood]").forEach((a) => {
   const look = () => {
+    cancelAnimationFrame(footRaf);
     const r = a.getBoundingClientRect();
     Orb.hold({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
     Orb.setMood(a.dataset.mood);
@@ -653,7 +798,9 @@ function uiFor(i) {
 }
 function placeHalo(el) {
   const a = app.getBoundingClientRect(), r = el.getBoundingClientRect();
-  Object.assign(halo.style, { left: r.left - a.left - 6 + "px", top: r.top - a.top - 6 + "px", width: r.width + 12 + "px", height: r.height + 12 + "px" });
+  const left = r.left - a.left - 6;
+  Object.assign(halo.style, { left: left + "px", top: r.top - a.top - 6 + "px", width: r.width + 12 + "px", height: r.height + 12 + "px" });
+  halo.classList.toggle("halo--left", left < 36);
 }
 const sparkLayer = $("#sparkLayer"), spark = $("#spark"), sparkPath = $("#sparkPath");
 function flySpark(x1, y1) {
@@ -772,4 +919,4 @@ const secObs = new IntersectionObserver((entries) => {
 }, { rootMargin: "-50% 0px -50% 0px" });
 $$("main section").forEach((s) => secObs.observe(s));
 
-loadJob("writing");
+loadJob("slack");

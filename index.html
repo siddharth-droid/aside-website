@@ -10,12 +10,12 @@
 <meta property="og:description" content="Select something, press your trigger, and the answer opens right where you're working. No account, no subscription, your own model key.">
 <meta property="og:type" content="website">
 <meta name="color-scheme" content="light">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ffd27a'/%3E%3Cstop offset='.6' stop-color='%23f5a742'/%3E%3Cstop offset='1' stop-color='%232a2c33'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='15' fill='url(%23g)'/%3E%3Cellipse cx='11' cy='15.5' rx='1.4' ry='2.3' fill='%232e1f16'/%3E%3Cellipse cx='21' cy='15.5' rx='1.4' ry='2.3' fill='%232e1f16'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preload" href="fonts/apfel-grotezk-mittel.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/apfel-grotezk-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/doto-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="vendor/three.module.js">
-<link rel="stylesheet" href="site.css?v=18">
+<link rel="stylesheet" href="site.css?v=25">
 </head>
 <body>
 
@@ -61,17 +61,16 @@
     <p class="tag">AI answers at the edge of Windows</p>
     <h1 id="hero-title" class="display">
       <span class="sr">Select it. Ask Aside. Get back to work.</span>
-      <span aria-hidden="true">Select it. <span class="pill" id="heroPill"><span class="pill__orb" id="pillOrb"></span>Ask Aside<kbd>Alt + M5</kbd></span><br><span class="display__grey">Get back to work.</span></span>
+      <span aria-hidden="true">Select it. <span class="pill pill--clean" id="heroPill"><span class="pill__orb" id="pillOrb"></span>Ask Aside</span><br><span class="display__grey">Get back to work.</span></span>
     </h1>
-    <p class="lede">A small orb at the edge of your screen. Select something in any app, press your trigger, and the answer opens right there. One more key puts the rewrite back in place.</p>
+    <p class="lede">Select anything in any app, press <kbd class="key key--inline">Alt + M5</kbd>, <kbd class="key key--inline">Ctrl + Space</kbd>, or <kbd class="key key--inline">Mid Click</kbd> (really anything except Left Click), and the answer opens right there.</p>
     <div class="cta">
       <a class="btn btn--signal" id="heroDl" href="https://github.com/siddharth-droid/aside/releases/latest"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
       <a class="btn" href="#film"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg>Watch the 30s film</a>
     </div>
-    <ul class="facts-row" aria-label="What it takes">
-      <li>No account</li>
-      <li>No subscription</li>
-      <li>Your own DeepSeek or Gemini key</li>
+    <ul class="facts-row facts-row--models" aria-label="Supported models">
+      <li class="facts-row__models">Works with <span class="model-pill"><img src="assets/providers/openai.svg" width="14" height="14" alt="">OpenAI</span> <span class="model-pill"><img src="assets/providers/claude.svg" width="14" height="14" alt="">Claude</span> <span class="model-pill"><img src="assets/providers/gemini.svg" width="14" height="14" alt="">Gemini</span> <span class="model-pill"><img src="assets/providers/grok.svg" width="14" height="14" alt="">Grok</span> <span class="model-pill"><img src="assets/providers/deepseek.svg" width="14" height="14" alt="">DeepSeek</span> <span class="model-pill"><img src="assets/providers/ollama.svg" width="14" height="14" alt="">Ollama</span></li>
+      <li>No account, no subscription</li>
     </ul>
   </div>
 </section>
@@ -174,7 +173,7 @@
         <!-- The Aside panel, opening out of the orb -->
         <div class="dpanel" id="dpanel">
           <div class="dpanel__ctx"><span class="dpanel__label">Your selection</span><p class="dpanel__excerpt" id="dExcerpt"></p></div>
-          <div class="dpanel__chips" id="dChips"><span data-a="explain">Explain <kbd>Enter</kbd></span><span data-a="translate">Translate <kbd>Ctrl T</kbd></span><span data-a="rewrite">Rewrite <kbd>Ctrl R</kbd></span></div>
+          <div class="dpanel__chips" id="dChips"><span data-a="infer">Press <kbd>Enter</kbd>, or type anything</span></div>
           <div class="dpanel__answer" id="dAnswer"><p class="dpanel__q" id="dQ"></p><div id="dText"></div>
             <div class="dpanel__acts" id="dActs"><span id="dCopy">Copy <kbd>Ctrl Shift C</kbd></span><span id="dReplace">Replace selection <kbd>Ctrl Enter</kbd></span></div>
           </div>
@@ -236,7 +235,7 @@
         <ol class="race__list" data-race="b">
           <li>Select the text</li>
           <li>Press <kbd class="key">Alt</kbd> + <kbd class="key">Mouse 5</kbd></li>
-          <li>Press <kbd class="key">Ctrl R</kbd> to rewrite</li>
+          <li>Press <kbd class="key">Enter</kbd> (Aside infers what you need)</li>
           <li>Press <kbd class="key">Ctrl Enter</kbd> to put it back</li>
         </ol>
         <p class="race__done" id="raceDone">Back to work.</p>
@@ -251,17 +250,18 @@
     <div class="head-split">
       <div>
         <p class="tag">try it here</p>
-        <h2 id="try-title" class="h2">Try it on <em>your kind of work.</em></h2>
+        <h2 id="try-title" class="h2">Real moments on Windows, <em>handled in place.</em></h2>
       </div>
-      <p class="body">Pick a job, then click a dotted sentence or select any text. The answers on this page are written ahead of time; in Aside they come from the model you chose.</p>
+      <p class="body">Pick an app, then click a dotted line or the chart. Press Enter and Aside infers whether to fix, translate, soften, or explain. On this page the answers are prewritten; in Aside they come from the model you chose.</p>
     </div>
     <div class="try__grid">
       <div class="try__doc">
-        <div class="jobs" role="tablist" aria-label="Choose a job">
-          <button role="tab" class="job" data-job="writing" aria-selected="true">Writing</button>
-          <button role="tab" class="job" data-job="coding" aria-selected="false">Coding</button>
-          <button role="tab" class="job" data-job="studying" aria-selected="false">Studying</button>
-          <button role="tab" class="job" data-job="browsing" aria-selected="false">Browsing</button>
+        <div class="jobs" role="tablist" aria-label="Choose a real moment">
+          <button role="tab" class="job" data-job="slack" aria-selected="true">Slack</button>
+          <button role="tab" class="job" data-job="excel" aria-selected="false">Excel</button>
+          <button role="tab" class="job" data-job="lease" aria-selected="false">Lease PDF</button>
+          <button role="tab" class="job" data-job="bill" aria-selected="false">Cloud bill</button>
+          <button role="tab" class="job" data-job="terminal" aria-selected="false">PowerShell</button>
         </div>
         <div class="window" id="tryWin">
           <div class="window__bar">
@@ -276,26 +276,27 @@
         </div>
       </div>
       <div class="try__side">
-        <div class="panel note" id="note" data-state="empty" aria-live="polite">
-          <div class="ctx" id="noteCtx">
-            <span class="ctx__label">Your selection</span>
-            <p class="ctx__text" id="noteExcerpt"></p>
-          </div>
-          <div class="chips" id="noteChips" role="group" aria-label="Actions for the selection">
-            <button class="chip" data-act="explain">Explain <kbd>Enter</kbd></button>
-            <button class="chip" data-act="translate">Translate <kbd>Ctrl T</kbd></button>
-            <button class="chip" data-act="rewrite">Rewrite <kbd>Ctrl R</kbd></button>
-          </div>
-          <div class="answer" id="noteAnswer">
-            <p class="answer__q" id="noteQ"></p>
-            <p class="status sr" id="noteStatus" role="status"></p>
-            <div class="answer__text" id="noteText"></div>
-            <div class="answer__acts" id="noteActs">
-              <button class="act" id="noteCopy">Copy <kbd>Ctrl Shift C</kbd></button>
-              <button class="act act--primary" id="noteReplace">Replace selection <kbd>Ctrl Enter</kbd></button>
+        <div class="try__aside">
+          <div class="panel note" id="note" data-state="answer" aria-live="polite">
+            <div class="ctx" id="noteCtx">
+              <span class="ctx__label" id="noteCtxLabel">Your selection</span>
+              <p class="ctx__text" id="noteExcerpt"></p>
             </div>
+            <div class="chips" id="noteChips" role="group" aria-label="Ask Aside">
+              <button class="chip" data-act="infer">Ask Aside <kbd>Enter</kbd></button>
+            </div>
+            <div class="answer" id="noteAnswer">
+              <p class="answer__q" id="noteQ"></p>
+              <p class="status sr" id="noteStatus" role="status"></p>
+              <div class="answer__text" id="noteText"></div>
+              <div class="answer__acts" id="noteActs">
+                <button class="act" id="noteCopy">Copy <kbd>Ctrl Shift C</kbd></button>
+                <button class="act act--primary" id="noteReplace">Replace selection <kbd>Ctrl Enter</kbd></button>
+              </div>
+            </div>
+            <p class="note__empty" id="noteEmpty">Click any highlighted item to ask Aside.</p>
           </div>
-          <p class="note__empty" id="noteEmpty">Nothing selected yet. Aside waits at the edge until you hand it something.</p>
+          <div class="try__slot" id="slotTry" aria-hidden="true"></div>
         </div>
       </div>
     </div>
@@ -380,11 +381,11 @@
           <p>The light and the eyes show its state. Point at one and the orb at the edge of this page takes it on.</p>
         </div>
         <ul class="moods" id="moodList">
-          <li><button class="mood" data-mood="idle"><img class="mood__orb" src="assets/orb/orb-idle.png" width="120" height="125" alt="" loading="lazy">Idle</button></li>
-          <li><button class="mood" data-mood="thinking"><img class="mood__orb" src="assets/orb/orb-thinking.png" width="120" height="125" alt="" loading="lazy">Thinking</button></li>
-          <li><button class="mood" data-mood="curious"><img class="mood__orb" src="assets/orb/orb-curious.png" width="120" height="125" alt="" loading="lazy">Curious</button></li>
-          <li><button class="mood" data-mood="happy"><img class="mood__orb" src="assets/orb/orb-happy.png" width="120" height="125" alt="" loading="lazy">Happy</button></li>
-          <li><button class="mood" data-mood="screenshot"><img class="mood__orb" src="assets/orb/orb-screenshot.png" width="120" height="125" alt="" loading="lazy">Capturing</button></li>
+          <li><button class="mood" data-mood="happy"><span class="mood__orb" aria-hidden="true"></span>Happy</button></li>
+          <li><button class="mood" data-mood="idle"><span class="mood__orb" aria-hidden="true"></span>Idle</button></li>
+          <li><button class="mood" data-mood="thinking"><span class="mood__orb" aria-hidden="true"></span>Thinking</button></li>
+          <li><button class="mood" data-mood="curious"><span class="mood__orb" aria-hidden="true"></span>Curious</button></li>
+          <li><button class="mood" data-mood="screenshot"><span class="mood__orb" aria-hidden="true"></span>Capturing</button></li>
         </ul>
       </article>
 
@@ -394,10 +395,10 @@
           <p>Your trigger is yours to set: any key, or a modifier with the middle or side mouse buttons.</p>
         </div>
         <dl class="keys">
-          <div><dt>Explain</dt><dd><kbd class="key">Enter</kbd></dd></div>
-          <div><dt>Translate</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">T</kbd></dd></div>
-          <div><dt>Rewrite</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">R</kbd></dd></div>
+          <div><dt>Ask / infer</dt><dd><kbd class="key">Enter</kbd></dd></div>
           <div><dt>Replace selection</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">Enter</kbd></dd></div>
+          <div><dt>Copy answer</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">Shift</kbd><kbd class="key">C</kbd></dd></div>
+          <div><dt>Step through Show me</dt><dd><kbd class="key">Ctrl</kbd><kbd class="key">↓</kbd></dd></div>
           <div><dt>Dismiss</dt><dd><kbd class="key">Esc</kbd></dd></div>
         </dl>
       </article>
@@ -421,9 +422,9 @@
           <p class="receipt__head">One question, itemised</p>
           <p class="receipt__sub">Sam's rewrite, 09:12</p>
           <dl class="receipt__rows">
-            <div><dt>Sent to</dt><dd>DeepSeek, on your key</dd></div>
+            <div><dt>Sent to</dt><dd>Your model, on your key</dd></div>
             <div><dt>Your selection</dt><dd>“Per my last email, the copy…”</dd></div>
-            <div><dt>Your question</dt><dd>Rewrite</dd></div>
+            <div><dt>Your question</dt><dd>Inferred on Enter</dd></div>
             <div><dt>Memory notes</dt><dd>Prefers short answers</dd></div>
           </dl>
           <dl class="receipt__rows receipt__rows--no">
@@ -432,11 +433,10 @@
             <div><dt>Files on your PC</dt><dd>not included</dd></div>
           </dl>
           <div class="receipt__total"><span>Sent to Aside</span><b>0 bytes</b></div>
-          <p class="receipt__foot">There are no Aside servers.</p>
         </div>
       </figure>
       <ul class="facts">
-        <li><strong>Your provider, your key.</strong> DeepSeek or Gemini for text, Qwen3-VL for captures, Tavily for web search if you add a key. Keys stay in Windows Credential Manager.</li>
+        <li><strong>Your provider, your key.</strong> OpenAI, Claude, Gemini, Grok, DeepSeek, OpenRouter, or local Ollama. One key handles text and captures (with optional separate vision or Tavily web search). Keys stay in Windows Credential Manager.</li>
         <li><strong>No account.</strong> Nothing to sign up for, and nothing of yours on our side.</li>
         <li><strong>Nothing kept.</strong> A conversation lasts until New chat or until you quit.</li>
         <li><strong>Memory you can read.</strong> The one exception: a local file in plain sentences, off with one switch.</li>
@@ -454,7 +454,7 @@
       <p class="body">Aside is question and answer, nothing else. Not a chat app, not a workspace, not an agent that acts for you.</p>
     </div>
     <div class="qa">
-      <details><summary>What does it cost?</summary><p>Aside has no subscription. You pay your model provider for what you use, on your own key. Text answers default to DeepSeek; Gemini is a switch in Settings.</p></details>
+      <details><summary>What does it cost?</summary><p>Aside has no subscription. Bring your own key for OpenAI, Claude, Gemini, Grok, DeepSeek, or OpenRouter, or run locally with Ollama for free.</p></details>
       <details><summary>Which apps does it work in?</summary><p>Any app on Windows where you can select text, and anything on screen you can drag the orb over. Replace selection pastes back into the app you came from.</p></details>
       <details><summary>Can it search the web?</summary><p>Yes, if you add a Tavily key. A “Searching for …” line shows while it looks.</p></details>
       <details><summary>Will it act for me, or click things?</summary><p>No. It answers, and for how-to questions it lights up where to click. You do the clicking.</p></details>
@@ -468,7 +468,7 @@
 <section class="finale" id="download" aria-labelledby="dl-title">
   <div class="wrap finale__inner">
     <h2 id="dl-title" class="display display--close">Keep working.<br><span class="dot">Ask Aside.</span></h2>
-    <p class="lede">For Windows. Install it, add a DeepSeek key in Settings, and press Alt with Mouse 5.</p>
+    <p class="lede">For Windows. Install it, connect any AI key (or local Ollama), and press your trigger.</p>
     <div class="cta cta--center">
       <a class="btn" id="dlBtn" href="https://github.com/siddharth-droid/aside/releases/latest"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10"/></svg>Download for Windows</a>
     </div>
@@ -492,6 +492,6 @@
   </div>
 </footer>
 
-<script type="module" src="app.js?v=19"></script>
+<script type="module" src="app.js?v=26"></script>
 </body>
 </html>

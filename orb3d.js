@@ -5,7 +5,7 @@ import * as THREE from "./vendor/three.module.js";
 const MOOD = {
   idle: { center: "#ffd27a", edge: "#f5a742", brightness: 1, eyes: [1, 0, 0], rightEye: 1, tilt: 0, gaze: null, swirl: 0, blinks: true, spread: 1 },
   happy: { center: "#fff1c9", edge: "#ff9e6b", brightness: 1.25, eyes: [0, 1, 0], rightEye: 1, tilt: 0, gaze: null, swirl: 0, blinks: false, spread: 1.9 },
-  curious: { center: "#c4f5ec", edge: "#4fc4bb", brightness: 1, eyes: [1, 0, 0], rightEye: 1.25, tilt: -8, gaze: null, swirl: 0, blinks: true, spread: 1 },
+  curious: { center: "#c4f5ec", edge: "#4fc4bb", brightness: 1, eyes: [1, 0, 0], rightEye: 1.25, tilt: 0, gaze: null, swirl: 0, blinks: true, spread: 1 },
   thinking: { center: "#f2c98a", edge: "#c9894a", brightness: 0.6, eyes: [1, 0, 0], rightEye: 1, tilt: 0, gaze: { x: 0.35, y: 1 }, swirl: 1, blinks: false, spread: 0.9 },
   screenshot: { center: "#ffb8a8", edge: "#ff7f6e", brightness: 1.1, eyes: [0, 0, 1], rightEye: 1, tilt: 0, gaze: { x: 0, y: 0 }, swirl: 0, blinks: false, spread: 1.25 },
 };
